@@ -1,8 +1,12 @@
 ci:
-  autoupdate_schedule: monthly
+  autoupdate_schedule: weekly
+  autofix_prs: false
+  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
+default_language_version:
+  python: python3.9
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
       - id: check-added-large-files
       - id: check-json
@@ -13,27 +17,27 @@ repos:
       - id: debug-statements
       - id: end-of-file-fixer
       - id: trailing-whitespace
-#      - id: no-commit-to-branch
-#        args: [ --branch, master ]
+      - id: no-commit-to-branch
+        args: [ --branch, master ]
   - repo: https://github.com/pycqa/isort
-    rev: 5.13.2
+    rev: 6.0.1
     hooks:
       - id: isort
   - repo: https://github.com/asottile/add-trailing-comma
-    rev: v3.1.0
+    rev: v3.2.0
     hooks:
       - id: add-trailing-comma
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: 'v0.4.9'
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: 'v0.12.3'
     hooks:
       - id: ruff
         args: [ --fix, --exit-non-zero-on-fix ]
   - repo: https://github.com/psf/black
-    rev: 24.4.2
+    rev: 25.1.0
     hooks:
       - id: black
   - repo: https://github.com/pappasam/toml-sort
-    rev: v0.23.1
+    rev: v0.24.2
     hooks:
       - id: toml-sort
         entry: toml-sort

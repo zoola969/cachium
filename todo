@@ -1,0 +1,12 @@
+- fix key builder
+- fix logger
+- use CacheKey
+- maxsize for cache keys
+- get CacheWith annotation from nested decorators
+- timeout for dog-pilling protection
+- Redis
+- Serializer per arg
+- Invalidation
+- Overview
+- asyncio to anyio
+- include args and kwargs into cache key
