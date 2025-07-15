@@ -4,75 +4,106 @@ from collections import defaultdict
 from concurrent.futures.thread import ThreadPoolExecutor
 from datetime import timedelta
 
+import pytest
+
 from py_cashier import cache
 
 
-def test__cache():
+@pytest.mark.parametrize(
+    ("a", "b", "expected"),
+    [
+        (1, 2, 3),
+        (1, 1, 2),
+        (5, 10, 15),
+    ],
+)
+def test_cache(a: int, b: int, expected: int) -> None:
+    """Test that the cache decorator works correctly for synchronous functions."""
     calls: dict[tuple[int, int], int] = defaultdict(int)
 
     @cache
-    def func(a: int, b: int) -> int:
+    def func(x: int, y: int) -> int:
         nonlocal calls
-        calls[(a, b)] += 1
-        return a + b
+        calls[(x, y)] += 1
+        return x + y
 
-    # 1st attempt
-    assert func(1, 2) == 3
-    assert func(1, 2) == 3
-    assert calls[(1, 2)] == 1
+    # First call should execute the function
+    assert func(a, b) == expected
 
-    # 2nd attempt
-    assert func(1, 1) == 2
-    assert func(1, 1) == 2
-    assert calls[(1, 1)] == 1
+    # Second call should use the cached result
+    assert func(a, b) == expected
+
+    # The function should only be called once for each unique set of arguments
+    assert calls[(a, b)] == 1
 
 
-async def test__cache__async():
+@pytest.mark.parametrize(
+    ("a", "b", "expected"),
+    [
+        (1, 2, 3),
+        (1, 1, 2),
+        (5, 10, 15),
+    ],
+)
+async def test_cache_async(a: int, b: int, expected: int) -> None:
+    """Test that the cache decorator works correctly for asynchronous functions."""
     calls: dict[tuple[int, int], int] = defaultdict(int)
 
     @cache(ttl=timedelta(seconds=1))
-    async def func(a: int, b: int) -> int:
+    async def func(x: int, y: int) -> int:
         nonlocal calls
-        calls[(a, b)] += 1
-        return a + b
+        calls[(x, y)] += 1
+        return x + y
 
-    # 1st attempt
-    assert await func(1, 2) == 3
-    assert await func(1, 2) == 3
-    assert calls[(1, 2)] == 1
+    # First call should execute the function
+    assert await func(a, b) == expected
 
-    # 2nd attempt
-    assert await func(1, 1) == 2
-    assert await func(1, 1) == 2
-    assert calls[(1, 1)] == 1
+    # Second call should use the cached result
+    assert await func(a, b) == expected
+
+    # The function should only be called once for each unique set of arguments
+    assert calls[(a, b)] == 1
 
 
-async def test__cache__dog_piling__async():
+@pytest.mark.parametrize(
+    ("a", "b", "expected", "tasks_count"),
+    [
+        (1, 2, 3, 100),
+        (5, 10, 15, 50),
+    ],
+)
+async def test_cache_dog_piling_async(a: int, b: int, expected: int, tasks_count: int) -> None:
     """Test dog-piling prevention in an asynchronous context.
 
     Tests the behavior of the caching mechanism to prevent dog-piling in an
     asynchronous context. It verifies that concurrent calls to a cached
     function with the same arguments at the same time result in only one actual function call,
     returning the cached result for the rest.
-
     """
     calls = 0
 
     @cache(ttl=timedelta(seconds=1))
-    async def func(a: int, b: int) -> int:
+    async def func(x: int, y: int) -> int:
         await asyncio.sleep(0.1)
         nonlocal calls
         calls += 1
-        return a + b
+        return x + y
 
-    tasks = [func(1, 2) for _ in range(100)]
+    tasks = [func(a, b) for _ in range(tasks_count)]
 
     results = await asyncio.gather(*tasks)
-    assert all(result == 3 for result in results)
+    assert all(result == expected for result in results)
     assert calls == 1
 
 
-def test__cache__dog_piling__sync():
+@pytest.mark.parametrize(
+    ("a", "b", "expected", "workers_count"),
+    [
+        (1, 2, 3, 16),
+        (5, 10, 15, 8),
+    ],
+)
+def test_cache_dog_piling_sync(a: int, b: int, expected: int, workers_count: int) -> None:
     """Test that the cache decorator prevents dog-piling in a multithreaded environment.
 
     Dog-piling occurs when multiple threads try to compute the same value simultaneously.
@@ -81,48 +112,53 @@ def test__cache__dog_piling__sync():
     calls = 0
 
     @cache
-    def func(a: int, b: int) -> int:
+    def func(x: int, y: int) -> int:
         time.sleep(0.1)
         nonlocal calls
         calls += 1
-        return a + b
+        return x + y
 
     # Configure concurrent environment
-    workers_count = 16
     tasks_count = workers_count * 8
     executor = ThreadPoolExecutor(max_workers=workers_count)
 
-    # Create input arguments - each call will pass a tuple of (1, 2)
-    input_args = ((1, 2) for _ in range(tasks_count))
+    # Create input arguments - each call will pass a tuple of (a, b)
+    input_args = ((a, b) for _ in range(tasks_count))
 
     # Execute a function concurrently and check results
     results = executor.map(lambda p: func(*p), input_args)
 
-    # Verify all results equal 3, and the function was called exactly once
-    assert all(result == 3 for result in results)
+    # Verify all results equal the expected value, and the function was called exactly once
+    assert all(result == expected for result in results)
     assert calls == 1
 
 
-def test__cache__failing_func__sync():
+@pytest.mark.parametrize(
+    ("a", "b", "workers_count"),
+    [
+        (1, 2, 16),
+        (5, 10, 8),
+    ],
+)
+def test_cache_failing_func_sync(a: int, b: int, workers_count: int) -> None:
+    """Test that failing functions are not cached in synchronous context."""
     calls = 0
 
     @cache
-    def func(a: int, b: int) -> int:
+    def func(x: int, y: int) -> int:
         time.sleep(0.03)
         nonlocal calls
         calls += 1
-        msg = f"Test error: {a}, {b}"
+        msg = f"Test error: {x}, {y}"
         raise ValueError(msg)
 
-    workers_count = 16
     tasks_count = workers_count * 2
     executor = ThreadPoolExecutor(max_workers=workers_count)
 
-    # Create input arguments - each call will pass a tuple of (1, 2)
-    input_args = ((1, 2) for _ in range(tasks_count))
+    # Create input arguments - each call will pass the same tuple
+    input_args = ((a, b) for _ in range(tasks_count))
 
     # Execute a function concurrently and check results
-
     def func2(p: tuple[int, int]) -> int:
         try:
             return func(*p)
@@ -132,30 +168,39 @@ def test__cache__failing_func__sync():
     results = executor.map(func2, input_args)
 
     assert all(result == 0 for result in results)
+    # Each call should execute the function (no caching of errors)
     assert calls == tasks_count
 
 
-async def test__cache__failing_func__async():
+@pytest.mark.parametrize(
+    ("a", "b", "tasks_count"),
+    [
+        (1, 2, 10),
+        (5, 10, 5),
+    ],
+)
+async def test_cache_failing_func_async(a: int, b: int, tasks_count: int) -> None:
+    """Test that failing functions are not cached in asynchronous context."""
     calls = 0
 
     @cache(ttl=timedelta(seconds=1))
-    async def func(a: int, b: int) -> int:
+    async def func(x: int, y: int) -> int:
         await asyncio.sleep(0.1)
         nonlocal calls
         calls += 1
-        msg = f"Test error: {a}, {b}"
+        msg = f"Test error: {x}, {y}"
         raise ValueError(msg)
 
-    async def func2(a: int, b: int) -> int:
+    async def func2(x: int, y: int) -> int:
         try:
-            return await func(a, b)
+            return await func(x, y)
         except ValueError:
             return 0
 
-    tasks_count = 10
-    tasks = [func2(1, 2) for _ in range(tasks_count)]
+    tasks = [func2(a, b) for _ in range(tasks_count)]
 
     results = await asyncio.gather(*tasks)
 
     assert all(result == 0 for result in results)
+    # Each call should execute the function (no caching of errors)
     assert calls == tasks_count
