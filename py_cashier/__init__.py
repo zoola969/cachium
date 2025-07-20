@@ -1,5 +1,6 @@
-from ._builders import DefaultKeyBuilder, KeyBuilder
 from ._decorators import cache
+from ._key_builders import KeyBuilder
+from ._key_builders._default import DefaultKeyBuilder
 from ._serializers import KeySerializer, Md5KeySerializer, ReprKeySerializer, StdHashKeySerializer, StrKeySerializer
 from ._utils import CacheWith
 

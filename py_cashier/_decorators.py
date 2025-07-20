@@ -7,14 +7,14 @@ from typing import TYPE_CHECKING, Any, Callable, Protocol, TypeVar, cast, overlo
 
 from typing_extensions import ParamSpec
 
-from py_cashier._builders import DefaultKeyBuilder
+from py_cashier._key_builders import DefaultKeyBuilder
 from py_cashier._storages import BaseLock, Result, TTLMapStorage
 from py_cashier.logger import logger
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable
 
-    from py_cashier._builders import KeyBuilder
+    from py_cashier._key_builders import KeyBuilder
     from py_cashier._storages import BaseStorage
 
 TLock = TypeVar("TLock", bound=BaseLock)

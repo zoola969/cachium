@@ -1,4 +1,5 @@
 - fix key builder
+- rewrite simple lock (sync) to avoid locking the whole function
 - fix logger
 - use CacheKey
 - maxsize for cache keys
