@@ -1,11 +1,9 @@
 # py-cashier
 
-Sync and async cache with TTL and LRU support.
+Sync and async cache
 
 ## Features
 
-- Time-to-live (TTL) support for cache entries
-- Least Recently Used (LRU) eviction policy
 - Both synchronous and asynchronous API
 - Type-safe with full typing support
 - Customizable key builders and serializers
@@ -63,8 +61,9 @@ asyncio.run(main())
 ```python
 from datetime import timedelta
 from py_cashier import cache
+from py_cashier._storages import TTLMapStorage
 
-@cache(ttl=timedelta(hours=1), max_size=100)
+@cache(storage=lambda: TTLMapStorage(max_size=100, ttl=timedelta(hours=1)))
 def long_lived_cache_function(x):
     return x * 2
 ```

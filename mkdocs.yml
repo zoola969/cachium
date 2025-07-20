@@ -1,9 +1,9 @@
 # mkdocs.yml
 site_name: py-cashier
-site_description: Sync and async cache with TTL and LRU support
-site_url: https://zoola969.github.io/python_ttlru_map/
-repo_url: https://github.com/zoola969/python_ttlru_map
-repo_name: zoola969/python_ttlru_map
+site_description: Sync and async cache
+site_url: https://zoola969.github.io/py-cashier
+repo_url: https://github.com/zoola969/py-cashier
+repo_name: https://github.com/zoola969/py-cashier
 
 theme:
   name: material
@@ -59,8 +59,6 @@ plugins:
             signature_crossrefs: true
             show_symbol_type_heading: true
             show_symbol_type_toc: true
-            extensions:
-            - griffe_typingdoc
             show_root_heading: true
             show_if_no_docstring: true
             filters: ["!^_[^_]"]            # Exclude private members (starting with single _)
