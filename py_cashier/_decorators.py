@@ -3,7 +3,7 @@ from __future__ import annotations
 from asyncio import iscoroutinefunction
 from datetime import timedelta
 from functools import wraps
-from typing import TYPE_CHECKING, Any, Callable, TypeVar, cast, overload
+from typing import TYPE_CHECKING, Any, Callable, Protocol, TypeVar, cast, overload
 
 from typing_extensions import ParamSpec
 
@@ -12,6 +12,8 @@ from py_cashier._storages import BaseLock, Result, TTLMapStorage
 from py_cashier.logger import logger
 
 if TYPE_CHECKING:
+    from collections.abc import Awaitable
+
     from py_cashier._builders import KeyBuilder
     from py_cashier._storages import BaseStorage
 
@@ -21,13 +23,19 @@ T = TypeVar("T")
 F = TypeVar("F", bound=Callable[..., Any])
 
 
+class PKeyBuilder(Protocol):
+    def __call__(self) -> KeyBuilder: ...
+
+
+class PStorage(Protocol[T, TLock]):
+    def __call__(self) -> BaseStorage[T, TLock]: ...
+
+
 @overload
 def cache(
     *,
-    storage_class: type[BaseStorage[T, TLock]] | None = None,
-    key_builder: KeyBuilder | None = None,
-    max_size: int | None = 1024,
-    ttl: timedelta | None = timedelta(minutes=1),
+    storage: PStorage[T, TLock] | None = None,
+    key_builder: PKeyBuilder | None = None,
 ) -> Callable[[F], F]: ...
 
 
@@ -39,49 +47,50 @@ def cache(
     func: F | None = None,
     /,
     *,
-    storage_class: type[BaseStorage[T, TLock]] | None = None,
-    key_builder: KeyBuilder | None = None,
-    max_size: int | None = 1024,
-    ttl: timedelta | None = timedelta(minutes=1),
+    storage: PStorage[T, TLock] | None = None,
+    key_builder: PKeyBuilder | None = None,
 ) -> Callable[[F], F]:
     """Cache decorator."""
-    if storage_class is None:
-        storage_class = TTLMapStorage[T]
 
-    def _decorator(func_: F) -> F:
-        if iscoroutinefunction(func_):
-            return cast("F", _async_wrapper(func_, storage_class, key_builder, max_size, ttl))
-        return cast("F", _wrapper(func_, storage_class, key_builder, max_size, ttl))
+    def _decorator(f: F) -> F:
+        s = storage() if storage is not None else TTLMapStorage[T](max_size=1, ttl=timedelta(seconds=1))
+        k = key_builder() if key_builder is not None else DefaultKeyBuilder(func=f)
+
+        if iscoroutinefunction(f):
+            return cast(
+                "F",
+                _async_wrapper(func=f, storage=s, key_builder=k),
+            )
+
+        return cast(
+            "F",
+            _wrapper(func=f, storage=s, key_builder=k),
+        )
 
     if func is None:
         return _decorator
+
     return _decorator(func)
 
 
 def _wrapper(
     func: Callable[P, T],
-    storage_class: type[BaseStorage[T, TLock]] | None,
-    key_builder: KeyBuilder | None,
-    max_size: int | None,
-    ttl: timedelta | None,
+    storage: BaseStorage[T, TLock],
+    key_builder: KeyBuilder,
 ) -> Callable[P, T]:
-    if key_builder is None:
-        key_builder = DefaultKeyBuilder(func=func)
-
-    cache_storage = storage_class(max_size=max_size, ttl=ttl)
 
     @wraps(func)
     def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
         key = key_builder.build_key(*args, **kwargs)
-        with cache_storage.lock(key):
-            if (cached_result := cache_storage.get(key)) and isinstance(cached_result, Result):
+        with storage.lock(key):
+            if (cached_result := storage.get(key)) and isinstance(cached_result, Result):
                 logger.debug("Value for key '%s' has been retrieved from cache", key)
                 return cached_result.value
             logger.debug("No entry for key '%s' in cache", key)
 
             result = func(*args, **kwargs)
 
-            cache_storage.set(key, result)
+            storage.set(key, result)
             logger.debug("Value for key '%s' has been set to cache", key)
         return result
 
@@ -89,29 +98,22 @@ def _wrapper(
 
 
 def _async_wrapper(
-    func: Callable[P, T],
-    storage_class: type[BaseStorage],
-    key_builder: KeyBuilder | None,
-    max_size: int | None = 1024,
-    ttl: timedelta | None = timedelta(minutes=1),
-) -> Callable[P, T]:
-    if key_builder is None:
-        key_builder = DefaultKeyBuilder(func=func)
-
-    cache_storage = storage_class(max_size=max_size, ttl=ttl)
+    func: Callable[P, Awaitable[T]],
+    storage: BaseStorage[T, TLock],
+    key_builder: KeyBuilder,
+) -> Callable[P, Awaitable[T]]:
 
     @wraps(func)
     async def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
         key = key_builder.build_key(*args, **kwargs)
-        async with cache_storage.lock(key):
-            if (cached_result := await cache_storage.aget(key)) and isinstance(cached_result, Result):
+        async with storage.lock(key):
+            if (cached_result := await storage.aget(key)) and isinstance(cached_result, Result):
                 logger.debug("Value for key '%s' has been retrieved from cache", key)
                 return cached_result.value
             logger.debug("No entry for key '%s' in cache", key)
 
             result = await func(*args, **kwargs)
-
-            await cache_storage.aset(key, result)
+            await storage.aset(key, result)
             logger.debug("Value for key '%s' has been set to cache", key)
         return result
 

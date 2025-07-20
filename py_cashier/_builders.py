@@ -10,7 +10,11 @@ from py_cashier._serializers import ReprKeySerializer
 from py_cashier._utils import NOT_SET, build_cache_key_template, collect_args_info
 
 if TYPE_CHECKING:
-    from py_cashier._serializers import CacheKey, KeySerializer
+    from typing_extensions import TypeAlias
+
+    from py_cashier._serializers import KeySerializer
+
+TCacheKey: TypeAlias = str
 
 
 class KeyBuilder(ABC):
@@ -28,7 +32,7 @@ class KeyBuilder(ABC):
         self,
         *args: Any,  # noqa: ANN401
         **kwargs: Any,  # noqa: ANN401
-    ) -> CacheKey:
+    ) -> TCacheKey:
         """Abstract method for building a cache key.
 
             This method must be implemented by subclasses to define the mechanism
@@ -60,7 +64,7 @@ class DefaultKeyBuilder(KeyBuilder):
         self,
         *,
         prefix: str | None = None,
-        func: Callable[[...], Any],
+        func: Callable[..., Any],
         key_serializer: type[KeySerializer] = ReprKeySerializer,
         delimiter: str = "\t",
     ) -> None:
@@ -68,7 +72,7 @@ class DefaultKeyBuilder(KeyBuilder):
 
         :type prefix: str
         :param func: The function whose arguments will be analyzed for cache generation purposes.
-        :type func: Callable[[...], Any]
+        :type func: Callable[..., Any]
         :param key_serializer: A serializer class used to serialize the cache keys.
         :type key_serializer: type[KeySerializer]
         :param delimiter:  A delimiter string used for separating key-value pairs in the generated cache key.
@@ -129,7 +133,7 @@ class DefaultKeyBuilder(KeyBuilder):
         self,
         *args: Any,
         **kwargs: Any,
-    ) -> CacheKey:
+    ) -> TCacheKey:
         call_args = self._get_call_args(*args, **kwargs)
 
         return f"{self._prefix}:{self._cache_key_template.format(**call_args)}"

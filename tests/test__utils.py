@@ -1,7 +1,6 @@
-from typing import Annotated, Any
+from typing import Annotated, Any, Callable
 
 import pytest
-from black.lines import Callable
 
 from py_cashier import CacheWith
 from py_cashier._utils import NOT_SET, ArgInfo, FuncArgsInfo, cached, collect_args_info
