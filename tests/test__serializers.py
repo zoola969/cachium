@@ -117,5 +117,5 @@ def test_md5_key_serializer() -> None:
 
 def test_key_serializer_cannot_be_instantiated() -> None:
     """Test that KeySerializer cannot be instantiated directly."""
-    with pytest.raises(TypeError, match="Can't instantiate abstract class KeySerializer with abstract method to_str"):
+    with pytest.raises(TypeError, match="Can't instantiate abstract class KeySerializer"):
         KeySerializer()  # Abstract class cannot be instantiated
