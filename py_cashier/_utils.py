@@ -98,3 +98,32 @@ class ArgInfo(NamedTuple):
     name: str
     cached: bool
     default: Any | NotSet
+
+
+def get_call_args(
+    by_name: Mapping[str, ArgInfo],
+    by_position: Sequence[str],
+    args: Iterable[Any],
+    kwargs: Mapping[str, Any],
+) -> Mapping[str, Any]:
+    """Return mapping of argument names to their given values."""
+    max_arg_number = len(by_position)
+    for kw_name in kwargs:
+        if (data := by_name.get(kw_name)) and (pos := data.position) is not None:
+            max_arg_number = min(max_arg_number, pos)
+    res = {}
+
+    for i, arg_value in enumerate(args):
+        arg_name = by_position[i]
+        res[arg_name] = arg_value
+
+    res.update((kw_name, kw_value) for kw_name, kw_value in kwargs.items() if kw_name in by_name)
+
+    for name, info in by_name.items():
+        if name in res:
+            continue
+        if info.default is NOT_SET:
+            msg = f"Default value for argument '{name}' is not set"
+            raise RuntimeError(msg)
+        res[name] = info.default
+    return res

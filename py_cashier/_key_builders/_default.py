@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING, Any, Callable
 
 from typing_extensions import override
 
-from py_cashier import ReprKeySerializer
-from py_cashier._utils import NOT_SET, build_cache_key_template, collect_args_info
+from py_cashier._serializers import ReprKeySerializer
+from py_cashier._utils import build_cache_key_template, collect_args_info, get_call_args
 
 from ._abc import KeyBuilder
 
@@ -69,29 +69,12 @@ class DefaultKeyBuilder(KeyBuilder):
 
     def _get_call_args(self, *args: Any, **kwargs: Any) -> dict[str, str]:  # noqa: ANN401
         """Return mapping of argument names to their given values."""
-        max_arg_number = len(self._by_position)
-        for kw_name in kwargs:
-            if (data := self._by_name.get(kw_name)) and (pos := data.position) is not None:
-                max_arg_number = min(max_arg_number, pos)
-        res = {}
-
-        for i, arg_value in enumerate(args):
-            arg_name = self._by_position[i]
-            if not self._cache_by_args or arg_name in self._cache_by_args:
-                res[arg_name] = self._key_serializer.to_str(arg_value)
-
-        for kw_name, kw_value in kwargs.items():
-            if kw_name in self._by_name and (not self._cache_by_args or kw_name in self._cache_by_args):
-                res[kw_name] = self._key_serializer.to_str(kw_value)
-
-        for name, info in self._by_name.items():
-            if name in res or (self._cache_by_args and name not in self._cache_by_args):
-                continue
-            if info.default is NOT_SET:
-                msg = f"Default value for argument '{name}' is not set"
-                raise RuntimeError(msg)
-            res[name] = self._key_serializer.to_str(info.default)
-        return res
+        call_args = get_call_args(self._by_name, self._by_position, args, kwargs)
+        return {
+            name: self._key_serializer.to_str(value)
+            for name, value in call_args.items()
+            if self._cache_by_args is not None or name in self._cache_by_args
+        }
 
     @override
     def build_key(

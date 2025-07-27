@@ -3,7 +3,8 @@ from typing import Annotated, Any, Callable
 import pytest
 
 from py_cashier import CacheWith
-from py_cashier._utils import NOT_SET, ArgInfo, FuncArgsInfo, cached, collect_args_info
+from py_cashier._utils import NOT_SET, ArgInfo, FuncArgsInfo, cached, collect_args_info, get_call_args
+from tests.functions import TestFunctions
 
 
 @pytest.mark.parametrize(
@@ -118,3 +119,21 @@ def test__cached(type_alias: Any, expected: bool) -> None:
 )
 def test__collect_args_info(func: Callable, args_info: FuncArgsInfo) -> None:
     assert collect_args_info(func) == args_info
+
+
+@pytest.mark.parametrize(
+    ("func", "args", "kwargs", "result"),
+    [
+        (func, args, kwargs, call_args)
+        for func, possible_calls in TestFunctions.items()
+        for (args, kwargs, call_args) in possible_calls
+    ],
+)
+def test__get_call_args(
+    func: Callable[..., Any],
+    args: list[Any],
+    kwargs: dict[str, Any],
+    result: dict[str, Any],
+):
+    by_name, by_position, *_ = collect_args_info(func)
+    assert get_call_args(by_name, by_position, args, kwargs) == result
