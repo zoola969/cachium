@@ -74,7 +74,7 @@ class DefaultKeyBuilder(KeyBuilder):
         return {
             name: self._key_serializer.to_str(value)
             for name, value in call_args.items()
-            if self._cache_by_args is not None or name in self._cache_by_args
+            if not self._cache_by_args or name in self._cache_by_args
         }
 
     @override
