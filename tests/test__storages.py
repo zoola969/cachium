@@ -4,11 +4,16 @@ import asyncio
 import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import timedelta
-from typing import Any
+from queue import Queue
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
 from py_cashier._storages import BaseLock, BaseStorage, Result, SimpleLock, TTLMapStorage
+from py_cashier._storages._ttl_map import LockStorage
+
+if TYPE_CHECKING:
+    from concurrent.futures import Future
 
 
 @pytest.mark.parametrize(
@@ -43,7 +48,9 @@ def test_result_repr(value: Any, expected_repr: str) -> None:
 
 def test_simple_lock_sync() -> None:
     """Test SimpleLock in synchronous context."""
-    lock = SimpleLock()
+    lock_storage = LockStorage()
+    key = "test_lock_key"
+    lock = SimpleLock(lock_storage, key)
 
     # Test that lock can be acquired and released
     with lock:
@@ -71,33 +78,40 @@ def test_simple_lock_sync() -> None:
     assert shared_resource == 10
 
 
-async def test_simple_lock_async() -> None:
-    """Test SimpleLock in asynchronous context."""
-    lock = SimpleLock()
+def test__simple_lock__sync__concurrent_access() -> None:
+    """Test SimpleLock in synchronous context with concurrent access."""
+    lock_storage = LockStorage()
+    result = Queue()
 
-    # Test that lock can be acquired and released asynchronously
-    async with lock:
-        # Lock is acquired here
-        pass
-    # Lock is released here
+    shared_resource = {
+        0.1: 1,
+        0.01: 1,
+    }
 
-    # Test that lock prevents concurrent access
-    shared_resource = 0
-
-    async def increment_shared_resource() -> None:
+    def access_shared_resource(key: float) -> None:
         nonlocal shared_resource
-        async with lock:
-            # Simulate some work
-            local_copy = shared_resource
-            await asyncio.sleep(0.01)  # Small delay to simulate work
-            shared_resource = local_copy + 1
+        lock = SimpleLock(lock_storage, str(key))
+        with lock:
+            val = shared_resource[key]
+            time.sleep(key)  # Simulate some work
+            shared_resource[key] = val + 1
+            result.put(key)
 
-    # Create and gather tasks
-    tasks = [increment_shared_resource() for _ in range(10)]
-    await asyncio.gather(*tasks)
+    # Create a thread pool executor to run tasks concurrently
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        futures: list[Future[float]] = [
+            executor.submit(access_shared_resource, 0.1),
+            executor.submit(access_shared_resource, 0.1),
+            executor.submit(access_shared_resource, 0.01),
+            executor.submit(access_shared_resource, 0.01),
+        ]
+        # Wait for completion
+        [future.result() for future in futures]
 
-    # If the lock works correctly, each task should increment by 1
-    assert shared_resource == 10
+    # we can see that waiting for key 0.1 does not block waiting for key 0.01
+    assert [result.get() for _ in range(4)] == [0.01, 0.01, 0.1, 0.1], "Concurrent access did not work as expected"
+    # we can see that lock per key is acquired correctly
+    assert list(shared_resource.values()) == [3, 3], "Shared resource was not updated correctly"
 
 
 @pytest.mark.parametrize(

@@ -1,11 +1,11 @@
-- fix key builder
-- rewrite simple lock (sync) to avoid locking the whole function
 - fix logger
-- use CacheKey
-- maxsize for cache keys
 - get CacheWith annotation from nested decorators
 - timeout for dog-pilling protection
+- documentation
+- 0.1.0 release (choose name for the package)
 - Redis
+- use CacheKey
+- maxsize for cache keys
 - Serializer per arg
 - Invalidation
 - Overview
