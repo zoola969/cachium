@@ -12,14 +12,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
+      - name: "Set up Python"
         uses: actions/setup-python@v5
         with:
-          python-version: 3.12
-      - name: install build dependencies
-        run: pip install .[build]
-      - name: build
-        run: hatch build
+          python-version-file: ".python-version"
+
+      - name: Install project
+        run: uv sync --locked --no-default-groups
+
+      - name: Build
+        run: uv build
+
       - name: Store package distributions
         uses: actions/upload-artifact@v3
         with:
