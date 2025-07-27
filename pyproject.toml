@@ -4,6 +4,7 @@ requires = ["hatchling", "uv-dynamic-versioning"]
 
 [dependency-groups]
 dev = [
+    "black~=25.1",
     "pre-commit~=4.0",
 ]
 docs = [
@@ -105,8 +106,6 @@ fixable = ["ALL"]
 ignore = [
     "A003",  # Class attribute {name} is shadowing a python builtin
     "AIR",  # airflow
-    "ANN101",  # Missing type annotation for `self` in method
-    "ANN102",  # Missing type annotation for `cls` in classmethod
     "CPY",  # flake8-copyright
     "D100",  # Missing docstring in public module
     "D104",  # Missing docstring in public package
