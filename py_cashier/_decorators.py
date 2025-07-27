@@ -1,14 +1,13 @@
 from __future__ import annotations
 
 from asyncio import iscoroutinefunction
-from datetime import timedelta
 from functools import wraps
 from typing import TYPE_CHECKING, Any, Callable, Protocol, TypeVar, cast, overload
 
 from typing_extensions import ParamSpec
 
 from py_cashier._key_builders import DefaultKeyBuilder
-from py_cashier._storages import BaseLock, Result, TTLMapStorage
+from py_cashier._storages import BaseLock, Result
 from py_cashier.logger import logger
 
 if TYPE_CHECKING:
@@ -34,7 +33,7 @@ class PStorage(Protocol[T, TLock]):
 @overload
 def cache(
     *,
-    storage: PStorage[T, TLock] | None = None,
+    storage: PStorage[T, TLock],
     key_builder: PKeyBuilder | None = None,
 ) -> Callable[[F], F]: ...
 
@@ -47,24 +46,22 @@ def cache(
     func: F | None = None,
     /,
     *,
-    storage: PStorage[T, TLock] | None = None,
+    storage: PStorage[T, TLock],
     key_builder: PKeyBuilder | None = None,
 ) -> Callable[[F], F]:
     """Cache decorator."""
 
     def _decorator(f: F) -> F:
-        s = storage() if storage is not None else TTLMapStorage[T](max_size=1, ttl=timedelta(seconds=1))
         k = key_builder() if key_builder is not None else DefaultKeyBuilder(func=f)
-
         if iscoroutinefunction(f):
             return cast(
                 "F",
-                _async_wrapper(func=f, storage=s, key_builder=k),
+                _async_wrapper(func=f, storage=storage, key_builder=k),  # type: ignore[misc]
             )
 
         return cast(
             "F",
-            _wrapper(func=f, storage=s, key_builder=k),
+            _wrapper(func=f, storage=storage, key_builder=k),  # type: ignore[misc]
         )
 
     if func is None:
