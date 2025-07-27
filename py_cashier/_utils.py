@@ -122,7 +122,8 @@ def get_call_args(
     for name, info in by_name.items():
         if name in res:
             continue
-        if info.default is NOT_SET:
+        # Possible only if the function was called without one of the arguments
+        if info.default is NOT_SET:  # pragma: no cover
             msg = f"Default value for argument '{name}' is not set"
             raise RuntimeError(msg)
         res[name] = info.default

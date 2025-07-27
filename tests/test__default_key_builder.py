@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import inspect
 from typing import Any, Callable
 
@@ -34,3 +36,22 @@ def test__default_key_builder__build_key(
         DefaultKeyBuilder(func=func, key_serializer=StrKeySerializer, delimiter=",").build_key(*args, **kwargs)
         == expected_key
     )
+
+
+def _func() -> None:
+    return
+
+
+_TEST_FILE = inspect.getfile(_func)
+
+
+@pytest.mark.parametrize(
+    ("prefix", "expected"),
+    [
+        (None, f"{_TEST_FILE}:_func"),
+        ("", f"{_TEST_FILE}:_func"),
+        ("_prefix_", f"_prefix_:{_TEST_FILE}:_func"),
+    ],
+)
+def test__default_key_builder__build_key_prefix(prefix: str | None, expected: str):
+    assert DefaultKeyBuilder._build_key_prefix(_func, prefix) == expected

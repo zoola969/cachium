@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 from unittest.mock import Mock, patch
 
@@ -17,7 +17,21 @@ from py_cashier import KeySerializer, Md5KeySerializer, ReprKeySerializer, StdHa
         (StrKeySerializer, [1, 2, 3], "[1, 2, 3]"),
         (StrKeySerializer, {"a": 1, "b": 2}, "{'a': 1, 'b': 2}"),
         (StrKeySerializer, None, "None"),
-        (StrKeySerializer, datetime(2000, 1, 1), "2000-01-01 00:00:00"),
+        (
+            StrKeySerializer,
+            datetime(2000, 1, 1, tzinfo=None),  # noqa: DTZ001
+            "2000-01-01 00:00:00",
+        ),
+        (
+            StrKeySerializer,
+            datetime(2000, 1, 1),  # noqa: DTZ001
+            "2000-01-01 00:00:00",
+        ),
+        (
+            StrKeySerializer,
+            datetime(2000, 1, 1, tzinfo=timezone.utc),
+            "2000-01-01 00:00:00+00:00",
+        ),
         # ReprKeySerializer tests
         (ReprKeySerializer, 123, "123"),
         (ReprKeySerializer, 123.45, "123.45"),
@@ -25,7 +39,21 @@ from py_cashier import KeySerializer, Md5KeySerializer, ReprKeySerializer, StdHa
         (ReprKeySerializer, [1, 2, 3], "[1, 2, 3]"),
         (ReprKeySerializer, {"a": 1, "b": 2}, "{'a': 1, 'b': 2}"),
         (ReprKeySerializer, None, "None"),
-        (ReprKeySerializer, datetime(2000, 1, 1), "datetime.datetime(2000, 1, 1, 0, 0)"),
+        (
+            ReprKeySerializer,
+            datetime(2000, 1, 1, tzinfo=None),  # noqa: DTZ001
+            "datetime.datetime(2000, 1, 1, 0, 0)",
+        ),
+        (
+            ReprKeySerializer,
+            datetime(2000, 1, 1),  # noqa: DTZ001
+            "datetime.datetime(2000, 1, 1, 0, 0)",
+        ),
+        (
+            ReprKeySerializer,
+            datetime(2000, 1, 1, tzinfo=timezone.utc),
+            "datetime.datetime(2000, 1, 1, 0, 0, tzinfo=datetime.timezone.utc)",
+        ),
     ],
 )
 def test_basic_serializers(serializer_class: type[KeySerializer], value: Any, expected: str) -> None:

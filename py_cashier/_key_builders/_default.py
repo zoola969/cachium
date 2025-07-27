@@ -61,7 +61,8 @@ class DefaultKeyBuilder(KeyBuilder):
             delimiter=delimiter,
         )
 
-    def _build_key_prefix(self, func: Callable[..., Any], prefix: str | None) -> str:
+    @staticmethod
+    def _build_key_prefix(func: Callable[..., Any], prefix: str | None) -> str:
         """Build the prefix for the cache key."""
         if not prefix:
             return f"{inspect.getfile(func)}:{func.__name__}"
