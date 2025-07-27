@@ -42,12 +42,12 @@ def cache(
         if iscoroutinefunction(f):
             return cast(
                 "F",
-                _async_wrapper(func=f, storage=storage, key_builder=k),  # type: ignore[misc]
+                _async_wrapper(func=f, storage=storage(), key_builder=k),
             )
 
         return cast(
             "F",
-            _wrapper(func=f, storage=storage, key_builder=k),  # type: ignore[misc]
+            _wrapper(func=f, storage=storage(), key_builder=k),
         )
 
     return _decorator
