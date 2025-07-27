@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from asyncio import iscoroutinefunction
 from functools import wraps
-from typing import TYPE_CHECKING, Any, Callable, Protocol, TypeVar, cast, overload
+from typing import TYPE_CHECKING, Any, Callable, Protocol, TypeVar, cast
 
 from typing_extensions import ParamSpec
 
@@ -30,21 +30,7 @@ class PStorage(Protocol[T, TLock]):
     def __call__(self) -> BaseStorage[T, TLock]: ...
 
 
-@overload
 def cache(
-    *,
-    storage: PStorage[T, TLock],
-    key_builder: PKeyBuilder | None = None,
-) -> Callable[[F], F]: ...
-
-
-@overload
-def cache(func: F, /) -> F: ...
-
-
-def cache(
-    func: F | None = None,
-    /,
     *,
     storage: PStorage[T, TLock],
     key_builder: PKeyBuilder | None = None,
@@ -64,10 +50,7 @@ def cache(
             _wrapper(func=f, storage=storage, key_builder=k),  # type: ignore[misc]
         )
 
-    if func is None:
-        return _decorator
-
-    return _decorator(func)
+    return _decorator
 
 
 def _wrapper(
