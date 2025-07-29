@@ -7,16 +7,16 @@ from typing import TYPE_CHECKING, Any, Callable, Protocol, TypeVar, cast
 from typing_extensions import ParamSpec
 
 from py_cashier._key_builders import DefaultKeyBuilder
-from py_cashier._storages import BaseLock, Result
+from py_cashier._storages import BaseAsyncLock, BaseAsyncStorage, BaseLock, BaseStorage, Result
 from py_cashier.logger import logger
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable
 
     from py_cashier._key_builders import KeyBuilder
-    from py_cashier._storages import BaseStorage
 
 TLock = TypeVar("TLock", bound=BaseLock)
+TAsyncLock = TypeVar("TAsyncLock", bound=BaseAsyncLock)
 P = ParamSpec("P")
 T = TypeVar("T")
 F = TypeVar("F", bound=Callable[..., Any])
@@ -30,24 +30,34 @@ class PStorage(Protocol[T, TLock]):
     def __call__(self) -> BaseStorage[T, TLock]: ...
 
 
+class PAsyncStorage(Protocol[T, TAsyncLock]):
+    def __call__(self) -> BaseAsyncStorage[T, TAsyncLock]: ...
+
+
 def cache(
     *,
-    storage: PStorage[T, TLock],
+    storage: PStorage[T, TLock] | PAsyncStorage[T, TAsyncLock],
     key_builder: PKeyBuilder | None = None,
 ) -> Callable[[F], F]:
     """Cache decorator."""
 
     def _decorator(f: F) -> F:
         k = key_builder() if key_builder is not None else DefaultKeyBuilder(func=f)
+        s = storage()
         if iscoroutinefunction(f):
+            if not isinstance(s, BaseAsyncStorage):
+                msg = "Async function requires an async storage"
+                raise TypeError(msg)
             return cast(
                 "F",
-                _async_wrapper(func=f, storage=storage(), key_builder=k),
+                _async_wrapper(func=f, storage=s, key_builder=k),
             )
-
+        if not isinstance(s, BaseStorage):
+            msg = "Regular function requires a sync storage"
+            raise TypeError(msg)
         return cast(
             "F",
-            _wrapper(func=f, storage=storage(), key_builder=k),
+            _wrapper(func=f, storage=s, key_builder=k),
         )
 
     return _decorator
@@ -79,7 +89,7 @@ def _wrapper(
 
 def _async_wrapper(
     func: Callable[P, Awaitable[T]],
-    storage: BaseStorage[T, TLock],
+    storage: BaseAsyncStorage[T, TAsyncLock],
     key_builder: KeyBuilder,
 ) -> Callable[P, Awaitable[T]]:
 

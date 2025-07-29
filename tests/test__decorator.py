@@ -1,13 +1,22 @@
+from __future__ import annotations
+
 import asyncio
 import time
 from collections import defaultdict
 from concurrent.futures.thread import ThreadPoolExecutor
 from datetime import timedelta
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
 from py_cashier import cache
 from py_cashier._storages import TTLMapStorage
+from py_cashier._storages._ttl_map import TTLMapAsyncStorage
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from py_cashier._decorators import PAsyncStorage, PStorage
 
 
 @pytest.mark.parametrize(
@@ -50,7 +59,7 @@ async def test_cache_async(a: int, b: int, expected: int) -> None:
     """Test that the cache decorator works correctly for asynchronous functions."""
     calls: dict[tuple[int, int], int] = defaultdict(int)
 
-    @cache(storage=lambda: TTLMapStorage(max_size=1000, ttl=timedelta(seconds=1)))
+    @cache(storage=lambda: TTLMapAsyncStorage(max_size=1000, ttl=timedelta(seconds=1)))
     async def func(x: int, y: int) -> int:
         nonlocal calls
         calls[(x, y)] += 1
@@ -83,7 +92,7 @@ async def test_cache_dog_piling_async(a: int, b: int, expected: int, tasks_count
     """
     calls = 0
 
-    @cache(storage=lambda: TTLMapStorage(max_size=1000, ttl=timedelta(seconds=1)))
+    @cache(storage=lambda: TTLMapAsyncStorage(max_size=1000, ttl=timedelta(seconds=1)))
     async def func(x: int, y: int) -> int:
         await asyncio.sleep(0.1)
         nonlocal calls
@@ -184,7 +193,7 @@ async def test_cache_failing_func_async(a: int, b: int, tasks_count: int) -> Non
     """Test that failing functions are not cached in asynchronous context."""
     calls = 0
 
-    @cache(storage=lambda: TTLMapStorage(max_size=1000, ttl=timedelta(seconds=1)))
+    @cache(storage=lambda: TTLMapAsyncStorage(max_size=1000, ttl=timedelta(seconds=1)))
     async def func(x: int, y: int) -> int:
         await asyncio.sleep(0.1)
         nonlocal calls
@@ -205,3 +214,24 @@ async def test_cache_failing_func_async(a: int, b: int, tasks_count: int) -> Non
     assert all(result == 0 for result in results)
     # Each call should execute the function (no caching of errors)
     assert calls == tasks_count
+
+
+async def _af() -> None:
+    pass
+
+
+def _f() -> None:
+    pass
+
+
+@pytest.mark.parametrize(
+    ("func", "storage"),
+    [
+        (_af, lambda: TTLMapStorage(max_size=1000, ttl=timedelta(seconds=1))),
+        (_f, lambda: TTLMapAsyncStorage(max_size=1000, ttl=timedelta(seconds=1))),
+    ],
+)
+def test__decorator__invalid_storage(func: Callable[..., Any], storage: PStorage | PAsyncStorage) -> None:
+    """Test that the decorator raises TypeError for invalid storage."""
+    with pytest.raises(TypeError, match="(Async|Regular) function requires a(n async| sync) storage"):
+        cache(storage=storage)(func)

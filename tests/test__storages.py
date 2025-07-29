@@ -1,14 +1,20 @@
 from __future__ import annotations
 
 import asyncio
+import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import timedelta
-from typing import Any
+from queue import Queue
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
 from py_cashier._storages import BaseLock, BaseStorage, Result, SimpleLock, TTLMapStorage
+from py_cashier._storages._ttl_map import AsyncLockStorage, LockStorage, SimpleAsyncLock, TTLMapAsyncStorage
+
+if TYPE_CHECKING:
+    from concurrent.futures import Future
 
 
 @pytest.mark.parametrize(
@@ -43,7 +49,9 @@ def test_result_repr(value: Any, expected_repr: str) -> None:
 
 def test_simple_lock_sync() -> None:
     """Test SimpleLock in synchronous context."""
-    lock = SimpleLock()
+    lock_storage = LockStorage()
+    key = "test_lock_key"
+    lock = SimpleLock(lock_storage, key)
 
     # Test that lock can be acquired and released
     with lock:
@@ -73,7 +81,9 @@ def test_simple_lock_sync() -> None:
 
 async def test_simple_lock_async() -> None:
     """Test SimpleLock in asynchronous context."""
-    lock = SimpleLock()
+    async_lock_storage = AsyncLockStorage()
+    key = "test_lock_key"
+    lock = SimpleAsyncLock(async_lock_storage, key)
 
     # Test that lock can be acquired and released asynchronously
     async with lock:
@@ -100,54 +110,124 @@ async def test_simple_lock_async() -> None:
     assert shared_resource == 10
 
 
-@pytest.mark.parametrize(
-    "is_async",
-    [False, True],
-)
-def test_ttl_map_storage_basic(is_async: bool) -> None:
-    """Test TTLMapStorage basic functionality in both sync and async contexts."""
-    # Create storage with default settings
-    storage = TTLMapStorage()
+def test__simple_lock__sync__concurrent_access() -> None:
+    """Test SimpleLock in synchronous context with concurrent access."""
+    lock_storage = LockStorage()
+    result = Queue()
 
-    # Define test cases
-    async def async_test() -> None:
-        # Test set and get
-        await storage.aset("key1", "value1")
-        result = await storage.aget("key1")
-        assert result is not None
-        assert result.value == "value1"
+    shared_resource = {
+        0.1: 1,
+        0.01: 1,
+    }
 
-        # Test get for non-existent key
-        result = await storage.aget("non_existent_key")
-        assert result is None
+    def access_shared_resource(key: float) -> None:
+        nonlocal shared_resource
+        lock = SimpleLock(lock_storage, str(key))
+        with lock:
+            val = shared_resource[key]
+            time.sleep(key)  # Simulate some work
+            shared_resource[key] = val + 1
+            result.put(key)
 
-        # Test overwriting a key
-        await storage.aset("key1", "new_value")
-        result = await storage.aget("key1")
-        assert result is not None
-        assert result.value == "new_value"
+    # Create a thread pool executor to run tasks concurrently
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        futures: list[Future[None]] = [
+            executor.submit(access_shared_resource, 0.1),
+            executor.submit(access_shared_resource, 0.1),
+            executor.submit(access_shared_resource, 0.01),
+            executor.submit(access_shared_resource, 0.01),
+        ]
+        # Wait for completion
+        for future in futures:
+            future.result()
 
-    def sync_test() -> None:
-        # Test set and get
-        storage.set("key1", "value1")
-        result = storage.get("key1")
-        assert result is not None
-        assert result.value == "value1"
+    # we can see that waiting for key 0.1 does not block waiting for key 0.01
+    assert [result.get() for _ in range(4)] == [0.01, 0.01, 0.1, 0.1], "Concurrent access did not work as expected"
+    # we can see that lock per key is acquired correctly
+    assert list(shared_resource.values()) == [3, 3], "Shared resource was not updated correctly"
 
-        # Test get for non-existent key
-        result = storage.get("non_existent_key")
-        assert result is None
 
-        # Test overwriting a key
-        storage.set("key1", "new_value")
-        result = storage.get("key1")
-        assert result is not None
-        assert result.value == "new_value"
+async def test__simple_lock__async__concurrent_access() -> None:
+    """Test SimpleLock in asynchronous context with concurrent access."""
+    lock_storage = AsyncLockStorage()
+    result = asyncio.Queue()
 
-    if is_async:
-        asyncio.run(async_test())
+    shared_resource = {
+        0.1: 1,
+        0.01: 1,
+    }
+
+    async def access_shared_resource(key: float) -> None:
+        nonlocal shared_resource
+        lock = SimpleAsyncLock(lock_storage, str(key))
+        async with lock:
+            val = shared_resource[key]
+            await asyncio.sleep(key)  # Simulate some work
+            shared_resource[key] = val + 1
+            await result.put(key)
+
+    # Create a thread pool executor to run tasks concurrently
+    tasks = [
+        access_shared_resource(0.1),
+        access_shared_resource(0.1),
+        access_shared_resource(0.01),
+        access_shared_resource(0.01),
+    ]
+    if sys.version_info >= (3, 11):
+        async with asyncio.TaskGroup() as tg:
+            for task in tasks:
+                tg.create_task(task)
     else:
-        sync_test()
+        await asyncio.gather(*tasks)
+
+    # we can see that waiting for key 0.1 does not block waiting for key 0.01
+    assert [result.get_nowait() for _ in range(4)] == [
+        0.01,
+        0.01,
+        0.1,
+        0.1,
+    ], "Concurrent access did not work as expected"
+    # we can see that lock per key is acquired correctly
+    assert list(shared_resource.values()) == [3, 3], "Shared resource was not updated correctly"
+
+
+def test__ttl_map_storage__basic() -> None:
+    storage = TTLMapStorage()
+    # Test set and get
+    storage.set("key1", "value1")
+    result = storage.get("key1")
+    assert result is not None
+    assert result.value == "value1"
+
+    # Test get for non-existent key
+    result = storage.get("non_existent_key")
+    assert result is None
+
+    # Test overwriting a key
+    storage.set("key1", "new_value")
+    result = storage.get("key1")
+    assert result is not None
+    assert result.value == "new_value"
+
+
+async def test__ttl_map_async_storage__basic() -> None:
+    storage = TTLMapAsyncStorage()
+
+    # Test set and get
+    await storage.aset("key1", "value1")
+    result = await storage.aget("key1")
+    assert result is not None
+    assert result.value == "value1"
+
+    # Test get for non-existent key
+    result = await storage.aget("non_existent_key")
+    assert result is None
+
+    # Test overwriting a key
+    await storage.aset("key1", "new_value")
+    result = await storage.aget("key1")
+    assert result is not None
+    assert result.value == "new_value"
 
 
 @pytest.mark.parametrize(
@@ -210,32 +290,6 @@ def test_ttl_map_storage_max_size(max_size: int, keys_to_add: list[str], expecte
     # If we added more keys than max_size, verify the most recently added key is in the cache
     if len(keys_to_add) > max_size:
         assert storage.get(keys_to_add[-1]) is not None
-
-
-@pytest.mark.parametrize(
-    ("max_size", "ttl"),
-    [
-        (10, timedelta(minutes=1)),
-        (100, timedelta(seconds=30)),
-        (5, None),
-    ],
-)
-def test_ttl_map_storage_build(max_size: int, ttl: timedelta | None) -> None:
-    """Test TTLMapStorage.build factory method with different configurations."""
-    # Create a factory with the specified max_size
-    factory = TTLMapStorage.build(max_size=max_size)
-
-    # Create a storage with the specified TTL
-    storage = factory(ttl=ttl)
-
-    # Verify it's a TTLMapStorage instance
-    assert isinstance(storage, TTLMapStorage)
-
-    # Test basic functionality
-    storage.set("key1", "value1")
-    result = storage.get("key1")
-    assert result is not None
-    assert result.value == "value1"
 
 
 @pytest.mark.parametrize(
