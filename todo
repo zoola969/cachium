@@ -1,4 +1,5 @@
 - fix logger
+- change structure of the package (public sub modules)
 - get CacheWith annotation from nested decorators
 - timeout for dog-pilling protection
 - documentation

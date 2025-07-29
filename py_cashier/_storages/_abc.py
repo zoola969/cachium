@@ -30,17 +30,6 @@ class Result(Generic[TValue]):
 
 class BaseLock(ABC):
     @abstractmethod
-    async def __aenter__(self) -> Self: ...
-
-    @abstractmethod
-    async def __aexit__(
-        self,
-        exc_type: type[BaseException] | None,
-        exc_val: BaseException | None,
-        exc_tb: TracebackType | None,
-    ) -> None: ...
-
-    @abstractmethod
     def __enter__(self) -> Self: ...
 
     @abstractmethod
@@ -52,12 +41,40 @@ class BaseLock(ABC):
     ) -> None: ...
 
 
+class BaseAsyncLock(ABC):
+    @abstractmethod
+    async def __aenter__(self) -> Self: ...
+
+    @abstractmethod
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None: ...
+
+
 TLock = TypeVar("TLock", bound=BaseLock)
+TAsyncLock = TypeVar("TAsyncLock", bound=BaseAsyncLock)
 
 
 class BaseStorage(ABC, Generic[TValue, TLock]):
     @abstractmethod
     def lock(self, key: str) -> TLock:
+        """Return lock for the key."""
+
+    @abstractmethod
+    def get(self, key: str) -> Result[TValue] | None:
+        """Get value by key."""
+
+    @abstractmethod
+    def set(self, key: str, value: TValue) -> None:
+        """Set value by key."""
+
+
+class BaseAsyncStorage(ABC, Generic[TValue, TAsyncLock]):
+    @abstractmethod
+    def lock(self, key: str) -> TAsyncLock:
         """Return lock for the key."""
 
     @abstractmethod
@@ -67,11 +84,3 @@ class BaseStorage(ABC, Generic[TValue, TLock]):
     @abstractmethod
     async def aset(self, key: str, value: TValue) -> None:
         """Set value by key async."""
-
-    @abstractmethod
-    def get(self, key: str) -> Result[TValue] | None:
-        """Get value by key."""
-
-    @abstractmethod
-    def set(self, key: str, value: TValue) -> None:
-        """Set value by key."""

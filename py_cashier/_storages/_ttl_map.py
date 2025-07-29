@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from asyncio import Condition as AsyncCondition
 from datetime import timedelta
 from functools import partial
 from threading import Condition
@@ -10,7 +11,7 @@ from typing_extensions import override
 
 from py_cashier.logger import logger
 
-from ._abc import BaseLock, BaseStorage, Result, TValue
+from ._abc import BaseAsyncLock, BaseAsyncStorage, BaseLock, BaseStorage, Result, TValue
 
 if TYPE_CHECKING:
     from types import TracebackType
@@ -39,6 +40,27 @@ class LockStorage:
             self._condition.notify_all()
 
 
+class AsyncLockStorage:
+    def __init__(self) -> None:
+        self._locks: set[str] = set()
+        self._condition = AsyncCondition()
+
+    async def register_lock(self, key: str) -> None:
+        async with self._condition:
+            while key in self._locks:
+                logger.debug("Key '%s' is in use, waiting for release.", key)
+                await self._condition.wait()
+            logger.debug("Registering lock for key '%s'.", key)
+            self._locks.add(key)
+            self._condition.notify_all()
+
+    async def unregister_lock(self, key: str) -> None:
+        async with self._condition:
+            self._locks.discard(key)
+            logger.debug("Unregistering lock for key '%s'.", key)
+            self._condition.notify_all()
+
+
 class SimpleLock(BaseLock):
     def __init__(self, lock_storage: LockStorage, key: str) -> None:
         self._lock_storage = lock_storage
@@ -58,9 +80,15 @@ class SimpleLock(BaseLock):
     ) -> None:
         self._lock_storage.unregister_lock(self._key)
 
-    # Async context manager methods are useless here, as the lock logic is synchronous.
+
+class SimpleAsyncLock(BaseAsyncLock):
+    def __init__(self, lock_storage: AsyncLockStorage, key: str) -> None:
+        self._lock_storage = lock_storage
+        self._key = key
+
     @override
     async def __aenter__(self) -> Self:
+        await self._lock_storage.register_lock(self._key)
         return self
 
     @override
@@ -70,7 +98,7 @@ class SimpleLock(BaseLock):
         exc_val: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> None:
-        self._lock_storage.unregister_lock(self._key)
+        await self._lock_storage.unregister_lock(self._key)
 
 
 class TTLMapStorage(BaseStorage[TValue, SimpleLock]):
@@ -101,10 +129,27 @@ class TTLMapStorage(BaseStorage[TValue, SimpleLock]):
     def set(self, key: str, value: TValue) -> None:
         self._storage[key] = value
 
+
+class TTLMapAsyncStorage(BaseAsyncStorage[TValue, SimpleAsyncLock]):
+    def __init__(
+        self,
+        max_size: int | None = 1024,
+        ttl: timedelta | None = timedelta(minutes=1),
+    ) -> None:
+        self._lock_storage = AsyncLockStorage()
+        self._storage: TTLMap[str, TValue] = TTLMap(max_size=max_size, ttl=ttl)
+
+    @override
+    def lock(self, key: str) -> SimpleAsyncLock:
+        return SimpleAsyncLock(self._lock_storage, key)
+
     @override
     async def aget(self, key: str) -> Result[TValue] | None:
-        return self.get(key)
+        try:
+            return Result(self._storage[key])
+        except KeyError:
+            return None
 
     @override
     async def aset(self, key: str, value: TValue) -> None:
-        return self.set(key, value)
+        self._storage[key] = value
