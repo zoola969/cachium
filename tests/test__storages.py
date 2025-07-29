@@ -131,14 +131,15 @@ def test__simple_lock__sync__concurrent_access() -> None:
 
     # Create a thread pool executor to run tasks concurrently
     with ThreadPoolExecutor(max_workers=10) as executor:
-        futures: list[Future[float]] = [
+        futures: list[Future[None]] = [
             executor.submit(access_shared_resource, 0.1),
             executor.submit(access_shared_resource, 0.1),
             executor.submit(access_shared_resource, 0.01),
             executor.submit(access_shared_resource, 0.01),
         ]
         # Wait for completion
-        [future.result() for future in futures]
+        for future in futures:
+            future.result()
 
     # we can see that waiting for key 0.1 does not block waiting for key 0.01
     assert [result.get() for _ in range(4)] == [0.01, 0.01, 0.1, 0.1], "Concurrent access did not work as expected"
@@ -147,7 +148,7 @@ def test__simple_lock__sync__concurrent_access() -> None:
 
 
 async def test__simple_lock__async__concurrent_access() -> None:
-    """Test SimpleLock in synchronous context with concurrent access."""
+    """Test SimpleLock in asynchronous context with concurrent access."""
     lock_storage = AsyncLockStorage()
     result = asyncio.Queue()
 
