@@ -53,7 +53,7 @@ def cache(
                 _async_wrapper(func=f, storage=s, key_builder=k),
             )
         if not isinstance(s, BaseStorage):
-            msg = "Regular function requires a synchronous storage"
+            msg = "Regular function requires a sync storage"
             raise TypeError(msg)
         return cast(
             "F",
