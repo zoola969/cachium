@@ -2,9 +2,8 @@ from __future__ import annotations
 
 from asyncio import Condition as AsyncCondition
 from datetime import timedelta
-from functools import partial
 from threading import Condition
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING
 
 from ttlru_map import TTLMap
 from typing_extensions import override
@@ -109,10 +108,6 @@ class TTLMapStorage(BaseStorage[TValue, SimpleLock]):
     ) -> None:
         self._lock_storage = LockStorage()
         self._storage: TTLMap[str, TValue] = TTLMap(max_size=max_size, ttl=ttl)
-
-    @classmethod
-    def build(cls, max_size: int | None = 1024) -> Callable[[timedelta | None], Self]:
-        return partial(cls, max_size=max_size)
 
     @override
     def lock(self, key: str) -> SimpleLock:

@@ -292,32 +292,6 @@ def test_ttl_map_storage_max_size(max_size: int, keys_to_add: list[str], expecte
 
 
 @pytest.mark.parametrize(
-    ("max_size", "ttl"),
-    [
-        (10, timedelta(minutes=1)),
-        (100, timedelta(seconds=30)),
-        (5, None),
-    ],
-)
-def test_ttl_map_storage_build(max_size: int, ttl: timedelta | None) -> None:
-    """Test TTLMapStorage.build factory method with different configurations."""
-    # Create a factory with the specified max_size
-    factory = TTLMapStorage.build(max_size=max_size)
-
-    # Create a storage with the specified TTL
-    storage = factory(ttl=ttl)
-
-    # Verify it's a TTLMapStorage instance
-    assert isinstance(storage, TTLMapStorage)
-
-    # Test basic functionality
-    storage.set("key1", "value1")
-    result = storage.get("key1")
-    assert result is not None
-    assert result.value == "value1"
-
-
-@pytest.mark.parametrize(
     "key",
     ["key1", "another_key", ""],
 )
