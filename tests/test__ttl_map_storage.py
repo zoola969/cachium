@@ -6,6 +6,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import timedelta
 from queue import Queue
+from threading import Thread
 from typing import TYPE_CHECKING, Any
 
 import pytest
@@ -334,3 +335,52 @@ def test_abstract_classes_cannot_be_instantiated(abstract_class: type, error_mes
 
     # Check that the error message contains the expected text
     assert error_message in str(excinfo.value)
+
+
+def test__simple_lock__timeout():
+    ls = LockStorage()
+    timeout = 0.05
+    res = Queue()
+
+    def func(key: str, sleep_time: float, id_: int) -> None:
+        ls.register_lock(key, id_, timeout=timeout)
+        time.sleep(sleep_time)
+        ls.unregister_lock(key, id_)
+        res.put(id_)
+
+    # Without timeout, the second thread would wait the first thread to finish and release the lock
+    # But with timeout, it waits only for the specified time
+    # force reacquires the lock and finishes before the first thread
+    t1 = Thread(None, func, args=("test_key", 0.1, 1))
+    t2 = Thread(None, func, args=("test_key", 0.01, 2))
+    t1.start()
+    t2.start()
+    t1.join()
+    t2.join()
+    assert [res.get() for _ in range(2)] == [2, 1], "Timeout did not work as expected"
+
+
+async def test__simple_async_lock__timeout():
+    ls = AsyncLockStorage()
+    timeout = 0.05
+    res = asyncio.Queue()
+
+    async def func(key: str, sleep_time: float, id_: int) -> None:
+        await ls.register_lock(key, id_, timeout=timeout)
+        await asyncio.sleep(sleep_time)
+        await ls.unregister_lock(key, id_)
+        await res.put(id_)
+
+    # Without timeout, the second coro would wait the first one to finish and release the lock
+    # But with timeout, it waits only for the specified time
+    # force reacquires the lock and finishes before the first coro
+    if sys.version_info >= (3, 11):
+        async with asyncio.TaskGroup() as tg:
+            tg.create_task(func("test_key", 0.1, 1))
+            tg.create_task(func("test_key", 0.01, 2))
+    else:
+        await asyncio.gather(
+            func("test_key", 0.1, 1),
+            func("test_key", 0.01, 2),
+        )
+    assert [res.get_nowait() for _ in range(2)] == [2, 1], "Timeout did not work as expected"

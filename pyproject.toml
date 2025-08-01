@@ -89,6 +89,7 @@ strict = true
 addopts = [
     "--code-highlight=yes",
     "--color=yes",
+    "--log-cli-level=DEBUG",
     "--strict-config",
     "--strict-markers",
     "-vv",
