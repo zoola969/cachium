@@ -4,61 +4,61 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from py_cashier import KeySerializer, Md5KeySerializer, ReprKeySerializer, StdHashKeySerializer, StrKeySerializer
+from py_cashier.serializers import Md5Serializer, ReprSerializer, Serializer, StdHashSerializer, StrSerializer
 
 
 @pytest.mark.parametrize(
     ("serializer_class", "value", "expected"),
     [
-        # StrKeySerializer tests
-        (StrKeySerializer, 123, "123"),
-        (StrKeySerializer, 123.45, "123.45"),
-        (StrKeySerializer, "hello", "hello"),
-        (StrKeySerializer, [1, 2, 3], "[1, 2, 3]"),
-        (StrKeySerializer, {"a": 1, "b": 2}, "{'a': 1, 'b': 2}"),
-        (StrKeySerializer, None, "None"),
+        # StrSerializer tests
+        (StrSerializer, 123, "123"),
+        (StrSerializer, 123.45, "123.45"),
+        (StrSerializer, "hello", "hello"),
+        (StrSerializer, [1, 2, 3], "[1, 2, 3]"),
+        (StrSerializer, {"a": 1, "b": 2}, "{'a': 1, 'b': 2}"),
+        (StrSerializer, None, "None"),
         (
-            StrKeySerializer,
+            StrSerializer,
             datetime(2000, 1, 1, tzinfo=None),  # noqa: DTZ001
             "2000-01-01 00:00:00",
         ),
         (
-            StrKeySerializer,
+            StrSerializer,
             datetime(2000, 1, 1),  # noqa: DTZ001
             "2000-01-01 00:00:00",
         ),
         (
-            StrKeySerializer,
+            StrSerializer,
             datetime(2000, 1, 1, tzinfo=timezone.utc),
             "2000-01-01 00:00:00+00:00",
         ),
-        # ReprKeySerializer tests
-        (ReprKeySerializer, 123, "123"),
-        (ReprKeySerializer, 123.45, "123.45"),
-        (ReprKeySerializer, "hello", "'hello'"),  # Note the quotes
-        (ReprKeySerializer, [1, 2, 3], "[1, 2, 3]"),
-        (ReprKeySerializer, {"a": 1, "b": 2}, "{'a': 1, 'b': 2}"),
-        (ReprKeySerializer, None, "None"),
+        # ReprSerializer tests
+        (ReprSerializer, 123, "123"),
+        (ReprSerializer, 123.45, "123.45"),
+        (ReprSerializer, "hello", "'hello'"),  # Note the quotes
+        (ReprSerializer, [1, 2, 3], "[1, 2, 3]"),
+        (ReprSerializer, {"a": 1, "b": 2}, "{'a': 1, 'b': 2}"),
+        (ReprSerializer, None, "None"),
         (
-            ReprKeySerializer,
+            ReprSerializer,
             datetime(2000, 1, 1, tzinfo=None),  # noqa: DTZ001
             "datetime.datetime(2000, 1, 1, 0, 0)",
         ),
         (
-            ReprKeySerializer,
+            ReprSerializer,
             datetime(2000, 1, 1),  # noqa: DTZ001
             "datetime.datetime(2000, 1, 1, 0, 0)",
         ),
         (
-            ReprKeySerializer,
+            ReprSerializer,
             datetime(2000, 1, 1, tzinfo=timezone.utc),
             "datetime.datetime(2000, 1, 1, 0, 0, tzinfo=datetime.timezone.utc)",
         ),
     ],
 )
-def test_basic_serializers(serializer_class: type[KeySerializer], value: Any, expected: str) -> None:
+def test_basic_serializers(serializer_class: type[Serializer], value: Any, expected: str) -> None:
     """Test that serializers correctly convert values to strings."""
-    assert serializer_class.to_str(value) == expected
+    assert serializer_class.serialize(value) == expected
 
 
 @pytest.mark.parametrize(
@@ -71,8 +71,8 @@ def test_basic_serializers(serializer_class: type[KeySerializer], value: Any, ex
     ],
 )
 def test_std_hash_key_serializer(value: Any) -> None:
-    """Test StdHashKeySerializer correctly converts hashable values to hash strings."""
-    hash_value = StdHashKeySerializer.to_str(value)
+    """Test StdHashSerializer correctly converts hashable values to hash strings."""
+    hash_value = StdHashSerializer.serialize(value)
 
     # Check that the result is a string
     assert isinstance(hash_value, str)
@@ -81,7 +81,7 @@ def test_std_hash_key_serializer(value: Any) -> None:
     assert hash_value.isdigit() or (hash_value.startswith("-") and hash_value[1:].isdigit())
 
     # Test that same input produces same hash within the same session
-    assert StdHashKeySerializer.to_str(value) == StdHashKeySerializer.to_str(value)
+    assert StdHashSerializer.serialize(value) == StdHashSerializer.serialize(value)
 
 
 @pytest.mark.parametrize(
@@ -92,20 +92,20 @@ def test_std_hash_key_serializer(value: Any) -> None:
     ],
 )
 def test_std_hash_key_serializer_unhashable(unhashable_value: Any) -> None:
-    """Test StdHashKeySerializer raises TypeError for unhashable types."""
+    """Test StdHashSerializer raises TypeError for unhashable types."""
     with pytest.raises(TypeError, match="unhashable type"):
-        StdHashKeySerializer.to_str(unhashable_value)
+        StdHashSerializer.serialize(unhashable_value)
 
 
 def test_md5_key_serializer() -> None:
-    """Test Md5KeySerializer correctly converts values to MD5 hash strings."""
+    """Test Md5Serializer correctly converts values to MD5 hash strings."""
     value = 123  # Example value to hash
     mock_hexdigest = Mock(return_value="a" * 32)
     mock_md5 = Mock()
     mock_md5.hexdigest = mock_hexdigest
 
     with patch("hashlib.md5", return_value=mock_md5) as mock_md5_func:
-        result = Md5KeySerializer.to_str(value)
+        result = Md5Serializer.serialize(value)
 
         # Verify md5 was called with string representation of value
         mock_md5_func.assert_called_once_with(str(value).encode(), usedforsecurity=False)
@@ -116,6 +116,6 @@ def test_md5_key_serializer() -> None:
 
 
 def test_key_serializer_cannot_be_instantiated() -> None:
-    """Test that KeySerializer cannot be instantiated directly."""
-    with pytest.raises(TypeError, match="Can't instantiate abstract class KeySerializer"):
-        KeySerializer()  # Abstract class cannot be instantiated
+    """Test that Serializer cannot be instantiated directly."""
+    with pytest.raises(TypeError, match="Can't instantiate abstract class Serializer"):
+        Serializer()  # Abstract class cannot be instantiated

@@ -18,6 +18,12 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
 
+__all__ = [
+    "TTLMapAsyncStorage",
+    "TTLMapStorage",
+]
+
+
 class LockStorage:
     def __init__(self) -> None:
         self._locks: set[str] = set()
@@ -101,6 +107,8 @@ class SimpleAsyncLock(BaseAsyncLock):
 
 
 class TTLMapStorage(BaseStorage[TValue, SimpleLock]):
+    """In-memory storage with TTL and size limit."""
+
     def __init__(
         self,
         max_size: int | None = 1024,
@@ -126,6 +134,8 @@ class TTLMapStorage(BaseStorage[TValue, SimpleLock]):
 
 
 class TTLMapAsyncStorage(BaseAsyncStorage[TValue, SimpleAsyncLock]):
+    """Asynchronous in-memory storage with TTL and size limit."""
+
     def __init__(
         self,
         max_size: int | None = 1024,

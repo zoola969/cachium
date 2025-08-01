@@ -145,18 +145,22 @@ print(result3)  # Output: 17
 ### Different Serializers
 
 ```python
-from py_cashier import cache, DefaultKeyBuilder, Md5KeySerializer
+from py_cashier import cache
+from py_cashier.key_builders import DefaultKeyBuilder
+from py_cashier.serializers import Md5Serializer
 
 # Use MD5 serializer for consistent hashing across processes
 key_builder = DefaultKeyBuilder(
     func=lambda x, y: x + y,
-    key_serializer=Md5KeySerializer
+    key_serializer=Md5Serializer
 )
+
 
 @cache(key_builder=key_builder)
 def compute_value(x: int, y: int) -> int:
     print(f"Computing {x} * {y}")
     return x * y
+
 
 # First call
 result = compute_value(5, 10)  # Output: Computing 5 * 10

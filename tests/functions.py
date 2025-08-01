@@ -30,7 +30,7 @@ TestFunctions[func2] = [
 ]
 
 
-def func3(a: int = 0, *, b: int = -1) -> None:
+def func3(a: int = 0, *args: Any, b: int = -1) -> None:
     return
 
 
@@ -55,17 +55,17 @@ TestFunctions[func4] = [
 ]
 
 
-def func5(a: int, /, b: int = 0, *, c: int = -1) -> None:
+def func5(a: int, /, b: int = 0, *args: Any, c: int, d: int = -1, **kwargs: Any) -> None:
     return
 
 
 TestFunctions[func5] = [
-    CallInfo(args=[1], kwargs={}, call_args={"a": 1, "b": 0, "c": -1}),
-    CallInfo(args=[1, 2], kwargs={}, call_args={"a": 1, "b": 2, "c": -1}),
-    CallInfo(args=[1, 2], kwargs={"c": 3}, call_args={"a": 1, "b": 2, "c": 3}),
-    CallInfo(args=[1], kwargs={"b": 2}, call_args={"a": 1, "b": 2, "c": -1}),
-    CallInfo(args=[1], kwargs={"c": 3}, call_args={"a": 1, "b": 0, "c": 3}),
-    CallInfo(args=[1], kwargs={"b": 2, "c": 3}, call_args={"a": 1, "b": 2, "c": 3}),
+    CallInfo(args=[1], kwargs={"c": 3}, call_args={"a": 1, "b": 0, "c": 3, "d": -1}),
+    CallInfo(args=[1, 2], kwargs={"c": 3}, call_args={"a": 1, "b": 2, "c": 3, "d": -1}),
+    CallInfo(args=[1, 2], kwargs={"c": 3, "d": 4}, call_args={"a": 1, "b": 2, "c": 3, "d": 4}),
+    CallInfo(args=[1], kwargs={"b": 2, "c": 3}, call_args={"a": 1, "b": 2, "c": 3, "d": -1}),
+    CallInfo(args=[1], kwargs={"c": 3, "d": 4}, call_args={"a": 1, "b": 0, "c": 3, "d": 4}),
+    CallInfo(args=[1], kwargs={"b": 2, "c": 3, "d": 4}, call_args={"a": 1, "b": 2, "c": 3, "d": 4}),
 ]
 
 # Check that the functions can be called with the expected arguments

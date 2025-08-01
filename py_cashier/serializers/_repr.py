@@ -1,9 +1,9 @@
 from typing import Any
 
-from ._abc import KeySerializer
+from ._abc import Serializer
 
 
-class ReprKeySerializer(KeySerializer):
+class ReprSerializer(Serializer):
     """A serializer class for converting values to string using their `repr` representation.
 
     The purpose of this class is to provide a specific serialization mechanism
@@ -14,17 +14,16 @@ class ReprKeySerializer(KeySerializer):
     ## Example
 
     ```python
-    from py_cashier import ReprKeySerializer
+    from py_cashier.serializers import ReprSerializer
 
-    serializer = ReprKeySerializer()
-    serializer.to_str("test")  # returns "'test'"
+    ReprSerializer.serialize("test")  # returns "'test'"
 
     from datetime import datetime
-    serializer.to_str(datetime(2000, 1, 1))  # returns 'datetime.datetime(2000, 1, 1, 0, 0)'
+    ReprSerializer.serialize(datetime(2000, 1, 1))  # returns 'datetime.datetime(2000, 1, 1, 0, 0)'
     ```
     """
 
     @classmethod
-    def to_str(cls, value: Any) -> str:  # noqa: ANN401
+    def serialize(cls, value: Any) -> str:  # noqa: ANN401
         """Convert value to string."""
         return repr(value)

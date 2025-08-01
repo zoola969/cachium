@@ -5,7 +5,8 @@ from typing import Any, Callable
 
 import pytest
 
-from py_cashier import DefaultKeyBuilder, StrKeySerializer
+from py_cashier.key_builders import DefaultKeyBuilder
+from py_cashier.serializers import StrSerializer
 from tests.functions import TestFunctions, func1
 
 _TEST_FILE = inspect.getfile(func1)
@@ -33,7 +34,7 @@ def test__default_key_builder__build_key(
     expected_key: str,
 ):
     assert (
-        DefaultKeyBuilder(func=func, key_serializer=StrKeySerializer, delimiter=",").build_key(*args, **kwargs)
+        DefaultKeyBuilder(func=func, key_serializer=StrSerializer, delimiter=",").build_key(*args, **kwargs)
         == expected_key
     )
 

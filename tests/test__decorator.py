@@ -10,8 +10,7 @@ from typing import TYPE_CHECKING, Any
 import pytest
 
 from py_cashier import cache
-from py_cashier._storages import TTLMapStorage
-from py_cashier._storages._ttl_map import TTLMapAsyncStorage
+from py_cashier.storages.ttl_map import TTLMapAsyncStorage, TTLMapStorage
 
 if TYPE_CHECKING:
     from collections.abc import Callable

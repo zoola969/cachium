@@ -1,14 +1,12 @@
-- fix logger
-- change structure of the package (public sub modules)
 - get CacheWith annotation from nested decorators
 - timeout for dog-pilling protection
 - documentation
 - 0.1.0 release (choose name for the package)
+- Invalidation
 - Redis
 - use CacheKey
 - maxsize for cache keys
 - Serializer per arg
-- Invalidation
 - Overview
 - asyncio to anyio
 - include args and kwargs into cache key

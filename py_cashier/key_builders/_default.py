@@ -5,13 +5,13 @@ from typing import TYPE_CHECKING, Any, Callable
 
 from typing_extensions import override
 
-from py_cashier._serializers import ReprKeySerializer
-from py_cashier._utils import build_cache_key_template, collect_args_info, get_call_args
+from py_cashier._helpers import build_cache_key_template, collect_args_info, get_call_args
+from py_cashier.serializers import ReprSerializer
 
 from ._abc import KeyBuilder
 
 if TYPE_CHECKING:
-    from py_cashier import KeySerializer
+    from py_cashier.serializers import Serializer
 
     from ._abc import TCacheKey
 
@@ -30,7 +30,7 @@ class DefaultKeyBuilder(KeyBuilder):
         *,
         prefix: str | None = None,
         func: Callable[..., Any],
-        key_serializer: type[KeySerializer] = ReprKeySerializer,
+        key_serializer: type[Serializer] = ReprSerializer,
         delimiter: str = "\t",
     ) -> None:
         """:param prefix: A string to be used as a prefix for keys.
@@ -39,7 +39,7 @@ class DefaultKeyBuilder(KeyBuilder):
         :param func: The function whose arguments will be analyzed for cache generation purposes.
         :type func: Callable[..., Any]
         :param key_serializer: A serializer class used to serialize the cache keys.
-        :type key_serializer: type[KeySerializer]
+        :type key_serializer: type[Serializer]
         :param delimiter:  A delimiter string used for separating key-value pairs in the generated cache key.
         :type delimiter: str
         :returns: None
@@ -72,7 +72,7 @@ class DefaultKeyBuilder(KeyBuilder):
         """Return mapping of argument names to their given values."""
         call_args = get_call_args(self._by_name, self._by_position, args, kwargs)
         return {
-            name: self._key_serializer.to_str(value)
+            name: self._key_serializer.serialize(value)
             for name, value in call_args.items()
             if not self._cache_by_args or name in self._cache_by_args
         }
