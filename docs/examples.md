@@ -145,7 +145,9 @@ print(result3)  # Output: 17
 ### Different Serializers
 
 ```python
-from py_cashier import cache, DefaultKeyBuilder, Md5Serializer
+from py_cashier import cache
+from py_cashier.key_builders import DefaultKeyBuilder
+from py_cashier.serializers import Md5Serializer
 
 # Use MD5 serializer for consistent hashing across processes
 key_builder = DefaultKeyBuilder(

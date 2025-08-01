@@ -16,12 +16,10 @@ class StrSerializer(Serializer):
     ```python
     from py_cashier.serializers import StrSerializer
 
-    serializer = StrSerializer()
-
-    serializer.serialize(123)  # returns '123'
+    StrSerializer.serialize(123)  # returns '123'
 
     from datetime import datetime
-    serializer.serialize(datetime(2000, 1, 1))  # returns '2000-01-01 00:00:00'
+    StrSerializer.serialize(datetime(2000, 1, 1))  # returns '2000-01-01 00:00:00'
 
     ```
     """
