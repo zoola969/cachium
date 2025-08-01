@@ -16,11 +16,10 @@ class ReprSerializer(Serializer):
     ```python
     from py_cashier.serializers import ReprSerializer
 
-    serializer = ReprSerializer()
-    serializer.serialize("test")  # returns "'test'"
+    ReprSerializer.serialize("test")  # returns "'test'"
 
     from datetime import datetime
-    serializer.serialize(datetime(2000, 1, 1))  # returns 'datetime.datetime(2000, 1, 1, 0, 0)'
+    ReprSerializer.serialize(datetime(2000, 1, 1))  # returns 'datetime.datetime(2000, 1, 1, 0, 0)'
     ```
     """
 

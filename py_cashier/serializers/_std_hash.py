@@ -22,14 +22,12 @@ class StdHashSerializer(Serializer):
     ```python
     from py_cashier.serializers import StdHashSerializer
 
-    serializer = StdHashSerializer()
-
-    serializer.serialize(123)  # returns a hash value like '1561442120842248018'
+    StdHashSerializer.serialize(123)  # returns a hash value like '1561442120842248018'
 
     from datetime import datetime
-    serializer.serialize(datetime(2000, 1, 1))  # returns a hash value like '5826678583026451935'
+    StdHashSerializer.serialize(datetime(2000, 1, 1))  # returns a hash value like '5826678583026451935'
 
-    serializer.serialize([1,2,3])  # raises TypeError: unhashable type: 'list'
+    StdHashSerializer.serialize([1,2,3])  # raises TypeError: unhashable type: 'list'
 
     # Note: Actual hash values will vary between Python sessions
     ```
