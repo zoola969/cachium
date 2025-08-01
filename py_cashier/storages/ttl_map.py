@@ -87,7 +87,7 @@ class AsyncLockStorage:
         async with self._condition:
             if self._locks.get(key) == id_:
                 del self._locks[key]
-            logger.debug("Unregistering lock for key '%s'.", key)
+            logger.debug("Lock for key '%s' has been unregistered.", key)
             self._condition.notify_all()
 
 

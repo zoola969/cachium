@@ -59,7 +59,7 @@ def test_simple_lock_sync() -> None:
     """Test SimpleLock in synchronous context."""
     lock_storage = LockStorage()
     key = "test_lock_key"
-    lock = SimpleLock(lock_storage, key)
+    lock = SimpleLock(lock_storage, key, timeout=None)
 
     # Test that lock can be acquired and released
     with lock:
@@ -87,11 +87,11 @@ def test_simple_lock_sync() -> None:
     assert shared_resource == 10
 
 
-async def test_simple_lock_async() -> None:
+async def test__simple_lock_async() -> None:
     """Test SimpleLock in asynchronous context."""
     async_lock_storage = AsyncLockStorage()
     key = "test_lock_key"
-    lock = SimpleAsyncLock(async_lock_storage, key)
+    lock = SimpleAsyncLock(async_lock_storage, key, timeout=None)
 
     # Test that lock can be acquired and released asynchronously
     async with lock:
@@ -130,7 +130,7 @@ def test__simple_lock__sync__concurrent_access() -> None:
 
     def access_shared_resource(key: float) -> None:
         nonlocal shared_resource
-        lock = SimpleLock(lock_storage, str(key))
+        lock = SimpleLock(lock_storage, str(key), timeout=None)
         with lock:
             val = shared_resource[key]
             time.sleep(key)  # Simulate some work
@@ -167,7 +167,7 @@ async def test__simple_lock__async__concurrent_access() -> None:
 
     async def access_shared_resource(key: float) -> None:
         nonlocal shared_resource
-        lock = SimpleAsyncLock(lock_storage, str(key))
+        lock = SimpleAsyncLock(lock_storage, str(key), timeout=None)
         async with lock:
             val = shared_resource[key]
             await asyncio.sleep(key)  # Simulate some work

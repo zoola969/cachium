@@ -237,7 +237,7 @@ def test__decorator__invalid_storage(func: Callable[..., Any], storage: PStorage
 
 
 def test__decorator__cache_only_by_chosen_args():
-    calls: dict[tuple[str, int, list[float]], int] = defaultdict(int)
+    calls: dict[tuple[str, int, float], int] = defaultdict(int)
 
     @cache(storage=lambda: TTLMapStorage(max_size=1000, ttl=timedelta(seconds=1)))
     def func(a: Annotated[str, CacheWith()], b: int, c: Annotated[float, CacheWith]) -> str:
