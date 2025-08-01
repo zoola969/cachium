@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 
 if sys.version_info < (3, 11):
     TimeoutError_ = asyncio.TimeoutError
-else:
+else:  # pragma: no cover
     TimeoutError_ = TimeoutError
 
 __all__ = [
