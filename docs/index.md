@@ -40,7 +40,7 @@ You can continue by adding content to the other documentation files based on you
 - CacheWith
 - DefaultKeyBuilder
 - KeyBuilder
-- KeySerializer and its implementations
+- Serializer and its implementations
 - The cache decorator
 
 Remember to install the required packages from your `docs` optional dependencies:

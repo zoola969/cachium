@@ -10,8 +10,15 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from py_cashier._storages import BaseLock, BaseStorage, Result, SimpleLock, TTLMapStorage
-from py_cashier._storages._ttl_map import AsyncLockStorage, LockStorage, SimpleAsyncLock, TTLMapAsyncStorage
+from py_cashier.storages import BaseLock, BaseStorage, Result
+from py_cashier.storages.ttl_map import (
+    AsyncLockStorage,
+    LockStorage,
+    SimpleAsyncLock,
+    SimpleLock,
+    TTLMapAsyncStorage,
+    TTLMapStorage,
+)
 
 if TYPE_CHECKING:
     from concurrent.futures import Future

@@ -3,7 +3,7 @@ from typing import Annotated, Any, Callable
 import pytest
 
 from py_cashier import CacheWith
-from py_cashier._utils import NOT_SET, ArgInfo, FuncArgsInfo, cached, collect_args_info, get_call_args
+from py_cashier._helpers import NOT_SET, ArgInfo, FuncArgsInfo, cached, collect_args_info, get_call_args
 from tests.functions import TestFunctions
 
 
@@ -14,10 +14,24 @@ from tests.functions import TestFunctions
         (int, False),
         (Annotated[int, CacheWith()], True),
         (Annotated[int, Exception(), CacheWith()], True),
+        (Annotated[int, CacheWith], True),
+        (Annotated[int, Exception(), CacheWith], True),
     ],
 )
 def test__cached(type_alias: Any, expected: bool) -> None:
     assert cached(type_alias) == expected
+
+
+def _func(
+    a: Annotated[int, CacheWith()],
+    /,
+    b: int = 0,
+    *args: Any,
+    c: int,
+    d: Annotated[int, CacheWith] = -1,
+    **kwargs: Any,
+) -> None:
+    return
 
 
 @pytest.mark.parametrize(
@@ -26,15 +40,6 @@ def test__cached(type_alias: Any, expected: bool) -> None:
         (
             lambda: None,
             FuncArgsInfo(by_name={}, by_position=[], args_name=None, kwargs_name=None),
-        ),
-        (
-            lambda *args, **kwargs: None,
-            FuncArgsInfo(
-                by_name={},
-                by_position=[],
-                args_name="args",
-                kwargs_name="kwargs",
-            ),
         ),
         (
             lambda *args_, **kwargs_: None,
@@ -46,71 +51,29 @@ def test__cached(type_alias: Any, expected: bool) -> None:
             ),
         ),
         (
-            lambda x: None,
-            FuncArgsInfo(
-                by_name={"x": ArgInfo(position=0, name="x", default=NOT_SET, cached=False)},
-                by_position=["x"],
-                args_name=None,
-                kwargs_name=None,
-            ),
-        ),
-        (
-            lambda x=None: None,
-            FuncArgsInfo(
-                by_name={"x": ArgInfo(position=0, name="x", default=None, cached=False)},
-                by_position=["x"],
-                args_name=None,
-                kwargs_name=None,
-            ),
-        ),
-        (
-            lambda *, x: None,
-            FuncArgsInfo(
-                by_name={"x": ArgInfo(position=0, name="x", default=NOT_SET, cached=False)},
-                by_position=[],
-                args_name=None,
-                kwargs_name=None,
-            ),
-        ),
-        (
-            lambda *, x=None: None,
-            FuncArgsInfo(
-                by_name={"x": ArgInfo(position=0, name="x", default=None, cached=False)},
-                by_position=[],
-                args_name=None,
-                kwargs_name=None,
-            ),
-        ),
-        (
-            lambda x, /: None,
-            FuncArgsInfo(
-                by_name={"x": ArgInfo(position=0, name="x", default=NOT_SET, cached=False)},
-                by_position=["x"],
-                args_name=None,
-                kwargs_name=None,
-            ),
-        ),
-        (
-            lambda x=None, /: None,
-            FuncArgsInfo(
-                by_name={"x": ArgInfo(position=0, name="x", default=None, cached=False)},
-                by_position=["x"],
-                args_name=None,
-                kwargs_name=None,
-            ),
-        ),
-        (
-            lambda a, b, /, c, d=1, *args, e, f=2, **kwargs: None,
+            lambda a, /, b="b", *args, c, d="d", **kwargs: None,
             FuncArgsInfo(
                 by_name={
                     "a": ArgInfo(position=0, name="a", default=NOT_SET, cached=False),
-                    "b": ArgInfo(position=1, name="b", default=NOT_SET, cached=False),
+                    "b": ArgInfo(position=1, name="b", default="b", cached=False),
                     "c": ArgInfo(position=2, name="c", default=NOT_SET, cached=False),
-                    "d": ArgInfo(position=3, name="d", default=1, cached=False),
-                    "e": ArgInfo(position=4, name="e", default=NOT_SET, cached=False),
-                    "f": ArgInfo(position=5, name="f", default=2, cached=False),
+                    "d": ArgInfo(position=3, name="d", default="d", cached=False),
                 },
-                by_position=["a", "b", "c", "d"],
+                by_position=["a", "b"],
+                args_name="args",
+                kwargs_name="kwargs",
+            ),
+        ),
+        (
+            _func,
+            FuncArgsInfo(
+                by_name={
+                    "a": ArgInfo(position=0, name="a", default=NOT_SET, cached=True),
+                    "b": ArgInfo(position=1, name="b", default=0, cached=False),
+                    "c": ArgInfo(position=2, name="c", default=NOT_SET, cached=False),
+                    "d": ArgInfo(position=3, name="d", default=-1, cached=True),
+                },
+                by_position=["a", "b"],
                 args_name="args",
                 kwargs_name="kwargs",
             ),

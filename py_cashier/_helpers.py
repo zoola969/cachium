@@ -5,10 +5,10 @@ from typing import TYPE_CHECKING, Any, Callable, NamedTuple, TypeVar, final, get
 
 from typing_extensions import ParamSpec
 
+from py_cashier._errors import NoKwargsError
+
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping, Sequence
-
-    from py_cashier._serializers import KeySerializer
 
 P = ParamSpec("P")
 T = TypeVar("T")
@@ -19,6 +19,24 @@ class NotSet: ...
 
 
 NOT_SET = NotSet()
+
+
+class ArgInfo(NamedTuple):
+    position: int
+    name: str
+    cached: bool
+    default: Any | NotSet
+
+
+class FuncArgsInfo(NamedTuple):
+    by_name: Mapping[str, ArgInfo]
+    by_position: Sequence[str]
+    args_name: str | None
+    kwargs_name: str | None
+
+
+class CacheWith:
+    """Class to mark an argument as cacheable."""
 
 
 def get_arg_default_value(argspec: inspect.FullArgSpec, arg_position: int) -> Any | NotSet:  # noqa: ANN401
@@ -32,10 +50,6 @@ def get_arg_default_value(argspec: inspect.FullArgSpec, arg_position: int) -> An
     if arg_position < offset:
         return NOT_SET
     return argspec.defaults[arg_position - offset]
-
-
-class NoKwargsError(Exception):
-    pass
 
 
 def get_kwarg_default_value(argspec: inspect.FullArgSpec, kwarg_name: str) -> Any | NotSet:  # noqa: ANN401
@@ -54,14 +68,7 @@ def build_cache_key_template(sorted_arg_names: Iterable[str], *, delimiter: str 
 def cached(type_alias: Any) -> bool:  # noqa: ANN401
     if type_alias is None:
         return False
-    return any(isinstance(type_arg, CacheWith) for type_arg in get_args(type_alias))
-
-
-class FuncArgsInfo(NamedTuple):
-    by_name: Mapping[str, ArgInfo]
-    by_position: Sequence[str]
-    args_name: str | None
-    kwargs_name: str | None
+    return any(isinstance(type_arg, CacheWith) or type_arg is CacheWith for type_arg in get_args(type_alias))
 
 
 def collect_args_info(f: Callable[P, T]) -> FuncArgsInfo:
@@ -86,18 +93,6 @@ def collect_args_info(f: Callable[P, T]) -> FuncArgsInfo:
             cached=cached(typing_info.get(arg)),
         )
     return FuncArgsInfo(by_name=by_name, by_position=by_position, args_name=argspec.varargs, kwargs_name=argspec.varkw)
-
-
-class CacheWith:
-    def __init__(self, serializer: KeySerializer | None = None) -> None:
-        pass
-
-
-class ArgInfo(NamedTuple):
-    position: int
-    name: str
-    cached: bool
-    default: Any | NotSet
 
 
 def get_call_args(

@@ -6,14 +6,14 @@ from typing import TYPE_CHECKING, Any, Callable, Protocol, TypeVar, cast
 
 from typing_extensions import ParamSpec
 
-from py_cashier._key_builders import DefaultKeyBuilder
-from py_cashier._storages import BaseAsyncLock, BaseAsyncStorage, BaseLock, BaseStorage, Result
+from py_cashier.key_builders import DefaultKeyBuilder
 from py_cashier.logger import logger
+from py_cashier.storages import BaseAsyncLock, BaseAsyncStorage, BaseLock, BaseStorage, Result
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable
 
-    from py_cashier._key_builders import KeyBuilder
+    from py_cashier.key_builders import KeyBuilder
 
 TLock = TypeVar("TLock", bound=BaseLock)
 TAsyncLock = TypeVar("TAsyncLock", bound=BaseAsyncLock)
