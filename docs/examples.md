@@ -207,7 +207,7 @@ async def fetch_user(user_id: int, db: DB) -> dict:
 @app.get("/users/{user_id}")
 @cache(storage=lambda: TTLMapAsyncStorage(max_size=512, ttl=timedelta(seconds=30)))
 async def get_user_endpoint(
-        user_id: int,
+        user_id: Annotated[int, CacheWith()],
         request: Request,  # excluded from the cache key
         db: DB = Depends(get_db),  # dependency injection for DB access, excluded from cache key
 ):
