@@ -5,11 +5,11 @@ import time
 from collections import defaultdict
 from concurrent.futures.thread import ThreadPoolExecutor
 from datetime import timedelta
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Annotated, Any
 
 import pytest
 
-from py_cashier import cache
+from py_cashier import CacheWith, cache
 from py_cashier.storages.ttl_map import TTLMapAsyncStorage, TTLMapStorage
 
 if TYPE_CHECKING:
@@ -234,3 +234,22 @@ def test__decorator__invalid_storage(func: Callable[..., Any], storage: PStorage
     """Test that the decorator raises TypeError for invalid storage."""
     with pytest.raises(TypeError, match="(Async|Regular) function requires a(n async| sync) storage"):
         cache(storage=storage)(func)
+
+
+def test__decorator__cache_only_by_chosen_args():
+    calls: dict[tuple[str, int, float], int] = defaultdict(int)
+
+    @cache(storage=lambda: TTLMapStorage(max_size=1000, ttl=timedelta(seconds=1)))
+    def func(a: Annotated[str, CacheWith()], b: int, c: Annotated[float, CacheWith]) -> str:
+        nonlocal calls
+        calls[(a, b, c)] += 1
+        return f"{a}, {c}"
+
+    result = []
+    result.append(func("test", 1, 1.0))
+    result.append(func("test", 2, 1.0))  # this call hits the cache, despite different `b`
+    result.append(func("test2", 1, 1.0))
+    result.append(func("test", 1, 2.0))
+
+    assert result == ["test, 1.0", "test, 1.0", "test2, 1.0", "test, 2.0"]
+    assert all(v == 1 for v in calls.values())

@@ -65,6 +65,7 @@ target-version = ['py39']
 [tool.coverage.report]
 exclude_also = [
     "def __repr__",
+    "if sys.version_info",
     "if TYPE_CHECKING",
     "if typing.TYPE_CHECKING",
 ]
@@ -89,6 +90,7 @@ strict = true
 addopts = [
     "--code-highlight=yes",
     "--color=yes",
+    "--log-cli-level=DEBUG",
     "--strict-config",
     "--strict-markers",
     "-vv",

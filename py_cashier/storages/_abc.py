@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 if TYPE_CHECKING:
+    from datetime import timedelta
     from types import TracebackType
 
     from typing_extensions import Self
@@ -60,7 +61,7 @@ TAsyncLock = TypeVar("TAsyncLock", bound=BaseAsyncLock)
 
 class BaseStorage(ABC, Generic[TValue, TLock]):
     @abstractmethod
-    def lock(self, key: str) -> TLock:
+    def lock(self, key: str, *, timeout: timedelta | None = None) -> TLock:
         """Return lock for the key."""
 
     @abstractmethod
@@ -74,7 +75,7 @@ class BaseStorage(ABC, Generic[TValue, TLock]):
 
 class BaseAsyncStorage(ABC, Generic[TValue, TAsyncLock]):
     @abstractmethod
-    def lock(self, key: str) -> TAsyncLock:
+    def lock(self, key: str, *, timeout: timedelta | None = None) -> TAsyncLock:
         """Return lock for the key."""
 
     @abstractmethod
