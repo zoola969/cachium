@@ -205,7 +205,10 @@ async def fetch_user(user_id: int, db: DB) -> dict:
 # NOTE: Only 'user_id' participates in the cache key thanks to CacheWith.
 #       The 'db' dependency argument and request will be ignored by the key builder.
 @app.get("/users/{user_id}")
-@cache(storage=lambda: TTLMapAsyncStorage(max_size=512, ttl=timedelta(seconds=30)))
+@cache(
+    storage=lambda: TTLMapAsyncStorage(max_size=512, ttl=timedelta(seconds=30)),
+    with_=CacheWith("user_id"),
+)
 async def get_user_endpoint(
         user_id: Annotated[int, CacheWith()],
         request: Request,  # excluded from the cache key
