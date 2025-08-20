@@ -60,7 +60,7 @@ asyncio.run(main())
 ```python
 from datetime import timedelta
 from cachium import cache
-from cachium._storages import TTLMapStorage
+from cachium.storages.ttl_map import TTLMapStorage
 import time
 
 @cache(storage=lambda: TTLMapStorage(ttl=timedelta(seconds=5)))
@@ -90,7 +90,7 @@ print(f"Different timestamp: {ts1 != ts3}")  # Output: True
 
 ```python
 from cachium import cache
-from cachium._storages import TTLMapStorage
+from cachium.storages.ttl_map import TTLMapStorage
 
 @cache(storage=lambda: TTLMapStorage(max_size=2))  # Only store the 2 most recently used results
 def process_data(data_id: int) -> str:
@@ -224,7 +224,7 @@ import asyncio
 import random
 from datetime import timedelta
 from cachium import cache
-from cachium._storages import TTLMapStorage
+from cachium.storages.ttl_map import TTLMapStorage
 
 @cache(storage=lambda: TTLMapStorage(ttl=timedelta(minutes=5)))
 async def fetch_weather(city: str) -> dict:

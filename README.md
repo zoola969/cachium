@@ -61,7 +61,7 @@ asyncio.run(main())
 ```python
 from datetime import timedelta
 from cachium import cache
-from cachium._storages import TTLMapStorage
+from cachium.storages.ttl_map import TTLMapStorage
 
 @cache(storage=lambda: TTLMapStorage(max_size=100, ttl=timedelta(hours=1)))
 def long_lived_cache_function(x):
