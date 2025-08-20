@@ -5,13 +5,13 @@ from typing import TYPE_CHECKING, Any, Callable
 
 from typing_extensions import override
 
-from py_cashier._helpers import build_cache_key_template, collect_args_info, get_call_args
-from py_cashier.serializers import ReprSerializer
+from cachium._helpers import build_cache_key_template, collect_args_info, get_call_args
+from cachium.serializers import ReprSerializer
 
 from ._abc import KeyBuilder
 
 if TYPE_CHECKING:
-    from py_cashier.serializers import Serializer
+    from cachium.serializers import Serializer
 
     from ._abc import TCacheKey
 

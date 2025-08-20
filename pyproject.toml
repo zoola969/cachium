@@ -46,16 +46,16 @@ description = "Sync and async cache with TTL and LRU support."
 dynamic = ["version"]
 keywords = ["cache", "lru", "lru-cache", "time-to-live", "ttl"]
 license = {file = "LICENSE"}
-name = "py-cashier"
+name = "cachium"
 readme = "README.md"
 requires-python = ">=3.9"
 
 [project.urls]
-Changelog = "https://github.com/zoola969/py_cashier/CHANGELOG.md"
-Documentation = "https://py_cashier.readthedocs.io/en/latest/"  # FIXME
-Homepage = "https://github.com/zoola969/py_cashier"
-Issues = "https://github.com/zoola969/py_cashier/issues"
-Repository = "https://github.com/zoola969/py_cashier.git"
+Changelog = "https://github.com/zoola969/cachium/CHANGELOG.md"
+Documentation = "https://cachium.readthedocs.io/en/latest/"
+Homepage = "https://github.com/zoola969/cachium"
+Issues = "https://github.com/zoola969/cachium/issues"
+Repository = "https://github.com/zoola969/cachium.git"
 
 [tool.black]
 color = true
@@ -187,6 +187,12 @@ trailing_comma_inline_array = true
 [tool.uv]
 default-groups = ["dev", "docs", "test"]
 no-build = true
+
+[[tool.uv.index]]
+explicit = true
+name = "pypi"
+publish-url = "https://pypi.org/legacy/"
+url = "https://pypi.org/simple/"
 
 [tool.uv-dynamic-versioning]
 fallback-version = "0.0.0"

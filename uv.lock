@@ -737,7 +737,7 @@ wheels = [
 ]
 
 [[package]]
-name = "py-cashier"
+name = "cachium"
 source = { editable = "." }
 dependencies = [
     { name = "ttlru-map" },

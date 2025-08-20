@@ -14,7 +14,7 @@ class StrSerializer(Serializer):
     ## Example
 
     ```python
-    from py_cashier.serializers import StrSerializer
+    from cachium.serializers import StrSerializer
 
     StrSerializer.serialize(123)  # returns '123'
 

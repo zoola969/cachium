@@ -20,7 +20,7 @@ class StdHashSerializer(Serializer):
     ## Example
 
     ```python
-    from py_cashier.serializers import StdHashSerializer
+    from cachium.serializers import StdHashSerializer
 
     StdHashSerializer.serialize(123)  # returns a hash value like '1561442120842248018'
 

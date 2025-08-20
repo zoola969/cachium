@@ -29,7 +29,7 @@ jobs:
         run: uv sync --locked --no-default-groups --no-install-project --group dev --group test
 
       - name: "Run mypy"
-        run: uv run --no-project mypy py_cashier
+        run: uv run --no-project mypy cachium
 
       - name: "Run tests"
         run: uv run --no-project coverage run -m pytest tests/

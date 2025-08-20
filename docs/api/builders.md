@@ -9,8 +9,8 @@ Common parameters (DefaultKeyBuilder):
 
 Related pages: Concepts (key model), Examples (custom builders), and Serializers. Full reference below.
 
-::: py_cashier.key_builders._abc.KeyBuilder
+::: cachium.key_builders._abc.KeyBuilder
 
 ---
 
-::: py_cashier.key_builders._default.DefaultKeyBuilder
+::: cachium.key_builders._default.DefaultKeyBuilder

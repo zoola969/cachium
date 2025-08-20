@@ -10,16 +10,16 @@ When to use which:
 
 Related pages: Key Builders and Concepts. Full reference below.
 
-::: py_cashier.serializers._abc.Serializer
+::: cachium.serializers._abc.Serializer
 
 ---
 
-::: py_cashier.serializers._repr.ReprSerializer
+::: cachium.serializers._repr.ReprSerializer
 
 ---
 
-::: py_cashier.serializers._str.StrSerializer
+::: cachium.serializers._str.StrSerializer
 
 ---
 
-::: py_cashier.serializers._std_hash.StdHashSerializer
+::: cachium.serializers._std_hash.StdHashSerializer

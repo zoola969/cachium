@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 from ttlru_map import TTLMap
 from typing_extensions import override
 
-from py_cashier.logger import logger
+from cachium.logger import logger
 
 from ._abc import BaseAsyncLock, BaseAsyncStorage, BaseLock, BaseStorage, Result, TValue
 
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import Self
 
-    from py_cashier.key_builders import TCacheKey
+    from cachium.key_builders import TCacheKey
 
 
 if sys.version_info < (3, 11):

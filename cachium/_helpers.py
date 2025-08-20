@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, Callable, NamedTuple, TypeVar, final, get
 
 from typing_extensions import ParamSpec
 
-from py_cashier._errors import NoKwargsError
+from cachium._errors import NoKwargsError
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping, Sequence
