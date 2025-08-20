@@ -8,8 +8,9 @@ This page provides examples of how to use py-cashier in various scenarios.
 
 ```python
 from py_cashier import cache
+from py_cashier.storages.ttl_map import TTLMapStorage
 
-@cache()
+@cache(storage=lambda: TTLMapStorage())
 def fibonacci(n: int) -> int:
     """Calculate the nth Fibonacci number."""
     if n <= 1:
@@ -30,8 +31,9 @@ print(result2)  # Output: 55
 ```python
 import asyncio
 from py_cashier import cache
+from py_cashier.storages.ttl_map import TTLMapAsyncStorage
 
-@cache()
+@cache(storage=lambda: TTLMapAsyncStorage())
 async def fetch_data(user_id: int) -> dict:
     """Simulate fetching user data from a database."""
     print(f"Fetching data for user {user_id}...")
@@ -58,7 +60,7 @@ asyncio.run(main())
 ```python
 from datetime import timedelta
 from py_cashier import cache
-from py_cashier._storages import TTLMapStorage
+from py_cashier.storages.ttl_map import TTLMapStorage
 import time
 
 @cache(storage=lambda: TTLMapStorage(ttl=timedelta(seconds=5)))
@@ -88,7 +90,7 @@ print(f"Different timestamp: {ts1 != ts3}")  # Output: True
 
 ```python
 from py_cashier import cache
-from py_cashier._storages import TTLMapStorage
+from py_cashier.storages.ttl_map import TTLMapStorage
 
 @cache(storage=lambda: TTLMapStorage(max_size=2))  # Only store the 2 most recently used results
 def process_data(data_id: int) -> str:
@@ -115,7 +117,8 @@ process_data(2)  # No output (cached)
 ### Custom Key Builders
 
 ```python
-from py_cashier import cache, DefaultKeyBuilder
+from py_cashier import cache
+from py_cashier.key_builders import DefaultKeyBuilder
 
 # Only consider the first argument for caching
 key_builder = DefaultKeyBuilder(
@@ -173,81 +176,48 @@ print(result_again)  # Output: 50
 
 ## Practical Examples
 
-### Caching Database Queries
+### FastAPI: Selective caching with CacheWith
 
 ```python
-from py_cashier import cache
-from py_cashier._storages import TTLMapStorage
+from typing import Annotated
 from datetime import timedelta
-import sqlite3
 
-# Create a connection to a database
-conn = sqlite3.connect(':memory:')
-cursor = conn.cursor()
+from fastapi import Depends, FastAPI, Request
+from py_cashier import cache, CacheWith
+from py_cashier.storages.ttl_map import TTLMapAsyncStorage
 
-# Create a table and insert some data
-cursor.execute('CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT)')
-cursor.execute('INSERT INTO users VALUES (1, "Alice")')
-cursor.execute('INSERT INTO users VALUES (2, "Bob")')
-conn.commit()
+app = FastAPI()
 
-@cache(storage=lambda: TTLMapStorage(ttl=timedelta(minutes=5)))
-def get_user(user_id: int) -> dict:
-    """Get a user from the database by ID."""
-    print(f"Fetching user {user_id} from database...")
-    cursor.execute('SELECT id, name FROM users WHERE id = ?', (user_id,))
-    row = cursor.fetchone()
-    if row:
-        return {"id": row[0], "name": row[1]}
-    return None
+# Pretend database dependency
+class DB:
+    async def get_user(self, user_id: int) -> dict:
+        # Simulate expensive I/O call here
+        return {"id": user_id, "name": f"User {user_id}"}
 
-# First query hits the database
-user1 = get_user(1)  # Output: Fetching user 1 from database...
-print(user1)  # Output: {'id': 1, 'name': 'Alice'}
+async def get_db() -> DB:
+    return DB()
 
-# Second query uses cache
-user1_again = get_user(1)  # No output (cached)
-print(user1_again)  # Output: {'id': 1, 'name': 'Alice'}
+# Business function
+async def fetch_user(user_id: int, db: DB) -> dict:
+    return await db.get_user(user_id)
 
-# Different user ID hits the database again
-user2 = get_user(2)  # Output: Fetching user 2 from database...
-print(user2)  # Output: {'id': 2, 'name': 'Bob'}
+# FastAPI endpoint that we want to cache
+# NOTE: Only 'user_id' participates in the cache key thanks to CacheWith.
+#       The 'db' dependency argument and request will be ignored by the key builder.
+@app.get("/users/{user_id}")
+@cache(
+    storage=lambda: TTLMapAsyncStorage(max_size=512, ttl=timedelta(seconds=30)),
+    with_=CacheWith("user_id"),
+)
+async def get_user_endpoint(
+        user_id: Annotated[int, CacheWith()],
+        request: Request,  # excluded from the cache key
+        db: DB = Depends(get_db),  # dependency injection for DB access, excluded from cache key
+):
+    return await fetch_user(user_id, db)
 ```
 
-### Caching API Requests
-
-```python
-import asyncio
-import random
-from datetime import timedelta
-from py_cashier import cache
-from py_cashier._storages import TTLMapStorage
-
-@cache(storage=lambda: TTLMapStorage(ttl=timedelta(minutes=5)))
-async def fetch_weather(city: str) -> dict:
-    """Simulate fetching weather data from an API."""
-    print(f"Fetching weather data for {city}...")
-    # Simulate API request delay
-    await asyncio.sleep(1)
-    # Return simulated weather data
-    return {
-        "city": city,
-        "temperature": random.randint(0, 30),
-        "conditions": random.choice(["Sunny", "Cloudy", "Rainy"])
-    }
-
-async def main():
-    # First call to the API
-    weather1 = await fetch_weather("New York")
-    print(f"Weather in New York: {weather1}")
-
-    # Second call uses cached data
-    weather2 = await fetch_weather("New York")
-    print(f"Weather in New York (cached): {weather2}")
-
-    # Different city makes a new API call
-    weather3 = await fetch_weather("London")
-    print(f"Weather in London: {weather3}")
-
-asyncio.run(main())
-```
+Why this works well with FastAPI
+- You keep the route handler simple and framework-friendly.
+- You selectively choose which inputs affect the cache via CacheWith, avoiding mixing non-deterministic or heavy objects (DB/session/request) into the cache key.
+- TTLMapAsyncStorage provides an async in-memory cache with TTL and LRU behavior, ideal for short-lived API caching.

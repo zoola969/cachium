@@ -1,0 +1,38 @@
+permissions:
+  contents: read
+name: Docs - Build and Link Check
+
+on:
+  pull_request:
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - '.github/workflows/docs-check.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+
+jobs:
+  build-and-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up uv (with Python)
+        uses: astral-sh/setup-uv@v6
+
+      - name: Install dependencies
+        run: uv sync --locked --no-default-groups --no-install-project --group docs
+
+      - name: Build site (uv ephemeral tool install)
+        run: uv run --no-project mkdocs build --strict
+
+      - name: Link check (external and internal)
+        uses: lycheeverse/lychee-action@v1
+        with:
+          args: --no-progress --verbose --accept 200,429 --base . "site/**/*.html"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

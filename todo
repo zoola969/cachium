@@ -1,7 +1,6 @@
-- documentation
 - 0.1.0 release (choose name for the package)
-- Invalidation
 - Redis
+- Invalidation
 - get CacheWith annotation from nested decorators
 - use CacheKey
 - maxsize for cache keys

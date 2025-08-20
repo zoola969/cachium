@@ -39,7 +39,48 @@ def cache(
     storage: PStorage[T, TLock] | PAsyncStorage[T, TAsyncLock],
     key_builder: PKeyBuilder | None = None,
 ) -> Callable[[F], F]:
-    """Cache decorator."""
+    """Cache decorator.
+
+    Decorate a function to cache its results based on a generated key.
+
+    Args:
+      storage: A callable that returns a storage instance used to store cached
+        values. For synchronous functions this must return a subclass of
+        BaseStorage; for asynchronous functions this must return a subclass of
+        BaseAsyncStorage. Passing a sync storage to an async function (or vice
+        versa) raises TypeError.
+      key_builder: Optional callable that returns a KeyBuilder to construct
+        cache keys from the function call. If omitted, DefaultKeyBuilder is
+        used which builds a key from the function path/name and argument values
+        (serialized via ReprSerializer by default).
+
+    Returns:
+      A wrapper function with the same signature that retrieves values from the
+      storage when available and stores fresh results otherwise.
+
+    Examples:
+      Minimal usage:
+        >>> from py_cashier import cache
+        >>> from py_cashier.storages.ttl_map import TTLMapStorage
+        >>> @cache(storage=lambda: TTLMapStorage())
+        ... def add(a: int, b: int) -> int:
+        ...     return a + b
+        >>> add(1, 2)
+        3
+        >>> add(1, 2)
+        3
+
+      Async usage:
+        >>> import asyncio
+        >>> from py_cashier import cache
+        >>> from py_cashier.storages.ttl_map import TTLMapAsyncStorage
+        >>> @cache(storage=lambda: TTLMapAsyncStorage())
+        ... async def add_async(a: int, b: int) -> int:
+        ...     return a + b
+        >>> asyncio.run(add_async(1, 2))
+        3
+
+    """
 
     def _decorator(f: F) -> F:
         k = key_builder() if key_builder is not None else DefaultKeyBuilder(func=f)

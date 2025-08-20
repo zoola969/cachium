@@ -1,9 +1,10 @@
 # mkdocs.yml
 site_name: py-cashier
-site_description: Sync and async cache
+site_description: Sync and async cache for your Python applications.
 site_url: https://zoola969.github.io/py-cashier
 repo_url: https://github.com/zoola969/py-cashier
 repo_name: https://github.com/zoola969/py-cashier
+edit_uri: edit/main/
 
 theme:
   name: material
@@ -23,6 +24,11 @@ theme:
 
 nav:
   - Home: index.md
+  - Installation: installation.md
+  - Guides:
+    - Quickstart: guides/quickstart.md
+    - Concepts: guides/concepts.md
+    - Tutorials: guides/tutorials.md
   - API Reference:
     - Overview: api/index.md
     - Cache: api/cache.md
@@ -30,6 +36,8 @@ nav:
     - Serializers: api/serializers.md
     - Utilities: api/utilities.md
   - Examples: examples.md
+  - Contributing: contributing.md
+  - Changelog: changelog.md
 
 markdown_extensions:
   - pymdownx.highlight:
