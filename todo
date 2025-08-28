@@ -1,4 +1,4 @@
-- 0.1.0 release (choose name for the package)
+- Refactor key builder
 - Redis
 - Invalidation
 - get CacheWith annotation from nested decorators

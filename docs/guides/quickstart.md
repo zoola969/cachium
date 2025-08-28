@@ -15,7 +15,7 @@ from py_cashier import cache
 from py_cashier.storages.ttl_map import TTLMapStorage
 
 # Configure TTL and max size
-@cache(storage=lambda: TTLMapStorage(max_size=512, ttl=timedelta(seconds=30)))
+@cache(storage=TTLMapStorage.create_with(max_size=512, ttl=timedelta(seconds=30)))
 def add(a: int, b: int) -> int:
     return a + b
 
@@ -53,7 +53,7 @@ from py_cashier import cache, CacheWith
 from py_cashier.storages.ttl_map import TTLMapStorage
 
 # Only `x` participates in the cache key; calls differing only by `y` share the cached result
-@cache(storage=lambda: TTLMapStorage())
+@cache(storage=TTLMapStorage.create_with())
 def compute(x: Annotated[int, CacheWith()], y: int) -> int:
     return x + y
 
