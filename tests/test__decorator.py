@@ -30,7 +30,7 @@ def test_cache(a: int, b: int, expected: int) -> None:
     """Test that the cache decorator works correctly for synchronous functions."""
     calls: dict[tuple[int, int], int] = defaultdict(int)
 
-    @cache(storage=lambda: TTLMapStorage(max_size=1000, ttl=timedelta(seconds=1)))
+    @cache(storage=TTLMapStorage.create_with(max_size=1000, ttl=timedelta(seconds=1)))
     def func(x: int, y: int) -> int:
         nonlocal calls
         calls[(x, y)] += 1
@@ -58,7 +58,7 @@ async def test_cache_async(a: int, b: int, expected: int) -> None:
     """Test that the cache decorator works correctly for asynchronous functions."""
     calls: dict[tuple[int, int], int] = defaultdict(int)
 
-    @cache(storage=lambda: TTLMapAsyncStorage(max_size=1000, ttl=timedelta(seconds=1)))
+    @cache(storage=TTLMapAsyncStorage.create_with(max_size=1000, ttl=timedelta(seconds=1)))
     async def func(x: int, y: int) -> int:
         nonlocal calls
         calls[(x, y)] += 1
@@ -91,7 +91,7 @@ async def test_cache_dog_piling_async(a: int, b: int, expected: int, tasks_count
     """
     calls = 0
 
-    @cache(storage=lambda: TTLMapAsyncStorage(max_size=1000, ttl=timedelta(seconds=1)))
+    @cache(storage=TTLMapAsyncStorage.create_with(max_size=1000, ttl=timedelta(seconds=1)))
     async def func(x: int, y: int) -> int:
         await asyncio.sleep(0.1)
         nonlocal calls
@@ -120,7 +120,7 @@ def test_cache_dog_piling_sync(a: int, b: int, expected: int, workers_count: int
     """
     calls = 0
 
-    @cache(storage=lambda: TTLMapStorage(max_size=1000, ttl=timedelta(seconds=1)))
+    @cache(storage=TTLMapStorage.create_with(max_size=1000, ttl=timedelta(seconds=1)))
     def func(x: int, y: int) -> int:
         time.sleep(0.1)
         nonlocal calls
@@ -153,7 +153,7 @@ def test_cache_failing_func_sync(a: int, b: int, workers_count: int) -> None:
     """Test that failing functions are not cached in synchronous context."""
     calls = 0
 
-    @cache(storage=lambda: TTLMapStorage(max_size=1000, ttl=timedelta(seconds=1)))
+    @cache(storage=TTLMapStorage.create_with(max_size=1000, ttl=timedelta(seconds=1)))
     def func(x: int, y: int) -> int:
         time.sleep(0.03)
         nonlocal calls
@@ -192,7 +192,7 @@ async def test_cache_failing_func_async(a: int, b: int, tasks_count: int) -> Non
     """Test that failing functions are not cached in asynchronous context."""
     calls = 0
 
-    @cache(storage=lambda: TTLMapAsyncStorage(max_size=1000, ttl=timedelta(seconds=1)))
+    @cache(storage=TTLMapAsyncStorage.create_with(max_size=1000, ttl=timedelta(seconds=1)))
     async def func(x: int, y: int) -> int:
         await asyncio.sleep(0.1)
         nonlocal calls
@@ -226,8 +226,8 @@ def _f() -> None:
 @pytest.mark.parametrize(
     ("func", "storage"),
     [
-        (_af, lambda: TTLMapStorage(max_size=1000, ttl=timedelta(seconds=1))),
-        (_f, lambda: TTLMapAsyncStorage(max_size=1000, ttl=timedelta(seconds=1))),
+        (_af, TTLMapStorage.create_with(max_size=1000, ttl=timedelta(seconds=1))),
+        (_f, TTLMapAsyncStorage.create_with(max_size=1000, ttl=timedelta(seconds=1))),
     ],
 )
 def test__decorator__invalid_storage(func: Callable[..., Any], storage: PStorage | PAsyncStorage) -> None:
@@ -239,7 +239,7 @@ def test__decorator__invalid_storage(func: Callable[..., Any], storage: PStorage
 def test__decorator__cache_only_by_chosen_args():
     calls: dict[tuple[str, int, float], int] = defaultdict(int)
 
-    @cache(storage=lambda: TTLMapStorage(max_size=1000, ttl=timedelta(seconds=1)))
+    @cache(storage=TTLMapStorage.create_with(max_size=1000, ttl=timedelta(seconds=1)))
     def func(a: Annotated[str, CacheWith()], b: int, c: Annotated[float, CacheWith]) -> str:
         nonlocal calls
         calls[(a, b, c)] += 1

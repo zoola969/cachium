@@ -63,7 +63,7 @@ from cachium import cache
 from cachium.storages.ttl_map import TTLMapStorage
 import time
 
-@cache(storage=lambda: TTLMapStorage(ttl=timedelta(seconds=5)))
+@cache(storage=TTLMapStorage.create_with(ttl=timedelta(seconds=5)))
 def get_timestamp() -> float:
     """Return the current timestamp."""
     return time.time()
@@ -92,7 +92,7 @@ print(f"Different timestamp: {ts1 != ts3}")  # Output: True
 from cachium import cache
 from cachium.storages.ttl_map import TTLMapStorage
 
-@cache(storage=lambda: TTLMapStorage(max_size=2))  # Only store the 2 most recently used results
+@cache(storage=TTLMapStorage.create_with(max_size=2))  # Only store the 2 most recently used results
 def process_data(data_id: int) -> str:
     print(f"Processing data {data_id}...")
     return f"Processed {data_id}"
@@ -194,7 +194,7 @@ cursor.execute('INSERT INTO users VALUES (1, "Alice")')
 cursor.execute('INSERT INTO users VALUES (2, "Bob")')
 conn.commit()
 
-@cache(storage=lambda: TTLMapStorage(ttl=timedelta(minutes=5)))
+@cache(storage=TTLMapStorage.create_with(ttl=timedelta(minutes=5)))
 def get_user(user_id: int) -> dict:
     """Get a user from the database by ID."""
     print(f"Fetching user {user_id} from database...")
@@ -226,7 +226,7 @@ from datetime import timedelta
 from cachium import cache
 from cachium.storages.ttl_map import TTLMapStorage
 
-@cache(storage=lambda: TTLMapStorage(ttl=timedelta(minutes=5)))
+@cache(storage=TTLMapStorage.create_with(ttl=timedelta(minutes=5)))
 async def fetch_weather(city: str) -> dict:
     """Simulate fetching weather data from an API."""
     print(f"Fetching weather data for {city}...")

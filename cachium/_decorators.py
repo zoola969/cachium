@@ -62,7 +62,7 @@ def cache(
       Minimal usage:
         >>> from cachium import cache
         >>> from cachium.storages.ttl_map import TTLMapStorage
-        >>> @cache(storage=lambda: TTLMapStorage())
+        >>> @cache(storage=TTLMapStorage.create_with())
         ... def add(a: int, b: int) -> int:
         ...     return a + b
         >>> add(1, 2)
@@ -74,7 +74,7 @@ def cache(
         >>> import asyncio
         >>> from cachium import cache
         >>> from cachium.storages.ttl_map import TTLMapAsyncStorage
-        >>> @cache(storage=lambda: TTLMapAsyncStorage())
+        >>> @cache(storage=TTLMapAsyncStorage.create_with())
         ... async def add_async(a: int, b: int) -> int:
         ...     return a + b
         >>> asyncio.run(add_async(1, 2))

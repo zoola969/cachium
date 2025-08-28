@@ -28,7 +28,7 @@ from datetime import timedelta
 from cachium import cache
 from cachium.storages.ttl_map import TTLMapStorage
 
-@cache(storage=lambda: TTLMapStorage(max_size=1024, ttl=timedelta(minutes=1)))
+@cache(storage=TTLMapStorage.create_with(max_size=1024, ttl=timedelta(minutes=1)))
 def add(a: int, b: int) -> int:
     return a + b
 

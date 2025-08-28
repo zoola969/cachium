@@ -6,7 +6,7 @@ import time
 from asyncio import Condition as AsyncCondition
 from datetime import timedelta
 from threading import Condition
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 from ttlru_map import TTLMap
 from typing_extensions import override
@@ -146,6 +146,16 @@ class TTLMapStorage(BaseStorage[TValue, SimpleLock]):
         self._lock_storage = LockStorage()
         self._storage: TTLMap[TCacheKey, TValue] = TTLMap(max_size=max_size, ttl=ttl)
 
+    @classmethod
+    def create_with(
+        cls,
+        *,
+        max_size: int | None = 1000,
+        ttl: timedelta | None = timedelta(minutes=1),
+    ) -> Callable[..., Self]:
+        """Return a callable that creates a new instance of `TTLMapStorage` with the specified parameters."""
+        return lambda: cls(max_size=max_size, ttl=ttl)
+
     @override
     def lock(self, key: TCacheKey, *, timeout: timedelta | None = None) -> SimpleLock:
         return SimpleLock(self._lock_storage, key, timeout)
@@ -172,6 +182,16 @@ class TTLMapAsyncStorage(BaseAsyncStorage[TValue, SimpleAsyncLock]):
     ) -> None:
         self._lock_storage = AsyncLockStorage()
         self._storage: TTLMap[TCacheKey, TValue] = TTLMap(max_size=max_size, ttl=ttl)
+
+    @classmethod
+    def create_with(
+        cls,
+        *,
+        max_size: int | None = 1000,
+        ttl: timedelta | None = timedelta(minutes=1),
+    ) -> Callable[..., Self]:
+        """Return a callable that creates a new instance of `TTLMapAsyncStorage` with the specified parameters."""
+        return lambda: cls(max_size=max_size, ttl=ttl)
 
     @override
     def lock(self, key: TCacheKey, *, timeout: timedelta | None = None) -> SimpleAsyncLock:
