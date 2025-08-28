@@ -32,7 +32,7 @@ from py_cashier import cache
 from py_cashier.storages.ttl_map import TTLMapAsyncStorage
 
 # Configure TTL and max size for async storage
-@cache(storage=lambda: TTLMapAsyncStorage(max_size=512, ttl=timedelta(seconds=30)))
+@cache(storage=TTLMapAsyncStorage.create_with(max_size=512, ttl=timedelta(seconds=30)))
 async def add_async(a: int, b: int) -> int:
     # Simulate I/O
     await asyncio.sleep(0.1)

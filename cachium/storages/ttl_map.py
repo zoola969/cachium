@@ -153,7 +153,7 @@ class TTLMapStorage(BaseStorage[TValue, SimpleLock]):
         max_size: int | None = 1000,
         ttl: timedelta | None = timedelta(minutes=1),
     ) -> Callable[..., Self]:
-        """Return a callable that creates a new instance of `TTLMapAsyncStorage` with the specified parameters."""
+        """Return a callable that creates a new instance of `TTLMapStorage` with the specified parameters."""
         return lambda: cls(max_size=max_size, ttl=ttl)
 
     @override
