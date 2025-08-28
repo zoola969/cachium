@@ -4,7 +4,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from py_cashier.serializers import Md5Serializer, ReprSerializer, Serializer, StdHashSerializer, StrSerializer
+from cachium.serializers import Md5Serializer, ReprSerializer, Serializer, StdHashSerializer, StrSerializer
 
 
 @pytest.mark.parametrize(

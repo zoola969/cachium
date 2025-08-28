@@ -1,6 +1,6 @@
 import pytest
 
-from py_cashier._helpers import build_cache_key_template
+from cachium._helpers import build_cache_key_template
 
 
 @pytest.mark.parametrize(

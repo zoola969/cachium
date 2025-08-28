@@ -13,4 +13,4 @@ Common parameters:
 
 See also: Quickstart, Concepts, and Examples pages. Full reference below.
 
-::: py_cashier._decorators.cache
+::: cachium._decorators.cache

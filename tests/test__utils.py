@@ -2,8 +2,8 @@ from typing import Annotated, Any, Callable
 
 import pytest
 
-from py_cashier import CacheWith
-from py_cashier._helpers import NOT_SET, ArgInfo, FuncArgsInfo, cached, collect_args_info, get_call_args
+from cachium import CacheWith
+from cachium._helpers import NOT_SET, ArgInfo, FuncArgsInfo, cached, collect_args_info, get_call_args
 from tests.functions import TestFunctions
 
 

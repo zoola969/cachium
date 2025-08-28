@@ -6,14 +6,14 @@ from typing import TYPE_CHECKING, Any, Callable, Protocol, TypeVar, cast
 
 from typing_extensions import ParamSpec
 
-from py_cashier.key_builders import DefaultKeyBuilder
-from py_cashier.logger import logger
-from py_cashier.storages import BaseAsyncLock, BaseAsyncStorage, BaseLock, BaseStorage, Result
+from cachium.key_builders import DefaultKeyBuilder
+from cachium.logger import logger
+from cachium.storages import BaseAsyncLock, BaseAsyncStorage, BaseLock, BaseStorage, Result
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable
 
-    from py_cashier.key_builders import KeyBuilder
+    from cachium.key_builders import KeyBuilder
 
 TLock = TypeVar("TLock", bound=BaseLock)
 TAsyncLock = TypeVar("TAsyncLock", bound=BaseAsyncLock)
@@ -60,8 +60,8 @@ def cache(
 
     Examples:
       Minimal usage:
-        >>> from py_cashier import cache
-        >>> from py_cashier.storages.ttl_map import TTLMapStorage
+        >>> from cachium import cache
+        >>> from cachium.storages.ttl_map import TTLMapStorage
         >>> @cache(storage=lambda: TTLMapStorage())
         ... def add(a: int, b: int) -> int:
         ...     return a + b
@@ -72,8 +72,8 @@ def cache(
 
       Async usage:
         >>> import asyncio
-        >>> from py_cashier import cache
-        >>> from py_cashier.storages.ttl_map import TTLMapAsyncStorage
+        >>> from cachium import cache
+        >>> from cachium.storages.ttl_map import TTLMapAsyncStorage
         >>> @cache(storage=lambda: TTLMapAsyncStorage())
         ... async def add_async(a: int, b: int) -> int:
         ...     return a + b

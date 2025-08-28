@@ -1,4 +1,3 @@
-# TODO: add an url once the package name is registered on PyPI
 name: Publish to PyPI
 
 on:
@@ -23,7 +22,7 @@ jobs:
         run: uv sync --locked --no-default-groups
 
       - name: Build
-        run: uv build
+        run: uv build --build
 
       - name: Store package distributions
         uses: actions/upload-artifact@v3
@@ -38,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: "placeholder"
+      url: "https://pypi.org/p/cachium"
 
     permissions:
       id-token: write  # IMPORTANT: mandatory for trusted publishing

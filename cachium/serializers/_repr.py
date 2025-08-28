@@ -14,7 +14,7 @@ class ReprSerializer(Serializer):
     ## Example
 
     ```python
-    from py_cashier.serializers import ReprSerializer
+    from cachium.serializers import ReprSerializer
 
     ReprSerializer.serialize("test")  # returns "'test'"
 

@@ -11,8 +11,8 @@ from typing import TYPE_CHECKING, Any
 
 import pytest
 
-from py_cashier.storages import BaseLock, BaseStorage, Result
-from py_cashier.storages.ttl_map import (
+from cachium.storages import BaseLock, BaseStorage, Result
+from cachium.storages.ttl_map import (
     AsyncLockStorage,
     LockStorage,
     SimpleAsyncLock,

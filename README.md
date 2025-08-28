@@ -1,4 +1,4 @@
-# py-cashier
+# cachium
 
 Sync and async cache
 
@@ -12,13 +12,13 @@ Sync and async cache
 ## Installation
 
 ```bash
-pip install py-cashier
+pip install cachium
 ```
 
 ## Quick Start
 
 ```python
-from py_cashier import cache
+from cachium import cache
 
 # Simple function caching
 @cache()
@@ -60,8 +60,8 @@ asyncio.run(main())
 
 ```python
 from datetime import timedelta
-from py_cashier import cache
-from py_cashier._storages import TTLMapStorage
+from cachium import cache
+from cachium.storages.ttl_map import TTLMapStorage
 
 @cache(storage=lambda: TTLMapStorage(max_size=100, ttl=timedelta(hours=1)))
 def long_lived_cache_function(x):
@@ -71,7 +71,7 @@ def long_lived_cache_function(x):
 ### Custom Key Builders
 
 ```python
-from py_cashier import cache, DefaultKeyBuilder
+from cachium import cache, DefaultKeyBuilder
 
 # Create a custom key builder
 key_builder = DefaultKeyBuilder(

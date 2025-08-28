@@ -1,9 +1,9 @@
 # mkdocs.yml
-site_name: py-cashier
+site_name: cachium
 site_description: Sync and async cache for your Python applications.
-site_url: https://zoola969.github.io/py-cashier
-repo_url: https://github.com/zoola969/py-cashier
-repo_name: https://github.com/zoola969/py-cashier
+site_url: https://zoola969.github.io/cachium
+repo_url: https://github.com/zoola969/cachium
+repo_name: https://github.com/zoola969/cachium
 edit_uri: edit/main/
 
 theme:
@@ -24,11 +24,6 @@ theme:
 
 nav:
   - Home: index.md
-  - Installation: installation.md
-  - Guides:
-    - Quickstart: guides/quickstart.md
-    - Concepts: guides/concepts.md
-    - Tutorials: guides/tutorials.md
   - API Reference:
     - Overview: api/index.md
     - Cache: api/cache.md
@@ -36,8 +31,6 @@ nav:
     - Serializers: api/serializers.md
     - Utilities: api/utilities.md
   - Examples: examples.md
-  - Contributing: contributing.md
-  - Changelog: changelog.md
 
 markdown_extensions:
   - pymdownx.highlight:
@@ -71,5 +64,5 @@ plugins:
             show_if_no_docstring: true
             filters: ["!^_[^_]"]            # Exclude private members (starting with single _)
 watch:
-  - py_cashier/
+  - cachium/
   - docs/

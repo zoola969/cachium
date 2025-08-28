@@ -3,7 +3,7 @@ from typing import Any, Callable
 
 import pytest
 
-from py_cashier._helpers import NOT_SET, get_arg_default_value
+from cachium._helpers import NOT_SET, get_arg_default_value
 
 
 @pytest.mark.parametrize(

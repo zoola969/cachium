@@ -9,13 +9,13 @@ from typing import TYPE_CHECKING, Annotated, Any
 
 import pytest
 
-from py_cashier import CacheWith, cache
-from py_cashier.storages.ttl_map import TTLMapAsyncStorage, TTLMapStorage
+from cachium import CacheWith, cache
+from cachium.storages.ttl_map import TTLMapAsyncStorage, TTLMapStorage
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from py_cashier._decorators import PAsyncStorage, PStorage
+    from cachium._decorators import PAsyncStorage, PStorage
 
 
 @pytest.mark.parametrize(

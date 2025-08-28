@@ -5,8 +5,8 @@ from typing import Any, Callable
 
 import pytest
 
-from py_cashier.key_builders import DefaultKeyBuilder
-from py_cashier.serializers import StrSerializer
+from cachium.key_builders import DefaultKeyBuilder
+from cachium.serializers import StrSerializer
 from tests.functions import TestFunctions, func1
 
 _TEST_FILE = inspect.getfile(func1)
