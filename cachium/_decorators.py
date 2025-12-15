@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from asyncio import iscoroutinefunction
+from collections.abc import Callable
 from functools import wraps
-from typing import TYPE_CHECKING, Any, Callable, Protocol, TypeVar, cast
+from typing import TYPE_CHECKING, Any, Protocol, TypeVar, cast
 
 from typing_extensions import ParamSpec
 

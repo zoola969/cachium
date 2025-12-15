@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import inspect
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 
 from typing_extensions import override
 
@@ -11,6 +11,8 @@ from cachium.serializers import ReprSerializer
 from ._abc import KeyBuilder
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from cachium.serializers import Serializer
 
     from ._abc import TCacheKey
