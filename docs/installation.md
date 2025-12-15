@@ -1,6 +1,6 @@
 # Installation
 
-Supported Python versions: 3.9 – 3.13
+Supported Python versions: 3.10 – 3.14
 
 Install from PyPI:
 

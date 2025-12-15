@@ -33,7 +33,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
-    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.14",
     "Programming Language :: Python",
     "Topic :: Software Development :: Libraries",
     "Typing :: Typed",
@@ -48,7 +48,7 @@ keywords = ["cache", "lru", "lru-cache", "time-to-live", "ttl"]
 license = {file = "LICENSE"}
 name = "cachium"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 
 [project.urls]
 Changelog = "https://github.com/zoola969/cachium/CHANGELOG.md"
@@ -60,7 +60,6 @@ Repository = "https://github.com/zoola969/cachium.git"
 [tool.black]
 color = true
 line-length = 120
-target-version = ['py39']
 
 [tool.coverage.report]
 exclude_also = [

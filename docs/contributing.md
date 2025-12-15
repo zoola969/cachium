@@ -6,7 +6,7 @@ This page combines our previous Development Guide and contribution guidelines.
 
 ## Local environment
 
-- Python 3.9+
+- Python 3.10+
 - Optional tools for docs: mkdocs, mkdocs-material, mkdocstrings[python]
 
 Install the docs toolchain:
@@ -31,7 +31,7 @@ pytest -q
 
 ## Linting and typing
 
-- Use Python 3.9+ and run linters before committing
+- Use Python 3.10+ and run linters before committing
 - Follow typing and docstring conventions used in the project
 
 ## Opening issues and PRs
