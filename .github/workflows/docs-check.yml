@@ -19,10 +19,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up uv (with Python)
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
 
       - name: Install dependencies
         run: uv sync --locked --no-default-groups --no-install-project --group docs
@@ -31,7 +31,7 @@ jobs:
         run: uv run --no-project mkdocs build --strict
 
       - name: Link check (external and internal)
-        uses: lycheeverse/lychee-action@v1
+        uses: lycheeverse/lychee-action@v2
         with:
           args: --no-progress --verbose --accept 200,429 --base . "site/**/*.html"
         env:
