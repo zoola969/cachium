@@ -1,13 +1,16 @@
 from __future__ import annotations
 
 import inspect
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
 from cachium.key_builders import DefaultKeyBuilder
 from cachium.serializers import StrSerializer
 from tests.functions import TestFunctions, func1
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 _TEST_FILE = inspect.getfile(func1)
 

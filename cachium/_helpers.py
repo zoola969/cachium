@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 import inspect
-from typing import TYPE_CHECKING, Any, Callable, NamedTuple, TypeVar, final, get_args, get_type_hints
+from typing import TYPE_CHECKING, Any, NamedTuple, TypeVar, final, get_args, get_type_hints
 
 from typing_extensions import ParamSpec
 
 from cachium._errors import NoKwargsError
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Mapping, Sequence
+    from collections.abc import Callable, Iterable, Mapping, Sequence
 
 P = ParamSpec("P")
 T = TypeVar("T")

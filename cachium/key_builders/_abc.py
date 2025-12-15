@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from typing_extensions import TypeAlias
+    from typing import TypeAlias
 
 TCacheKey: TypeAlias = str
 

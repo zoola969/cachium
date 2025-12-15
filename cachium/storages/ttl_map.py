@@ -6,7 +6,7 @@ import time
 from asyncio import Condition as AsyncCondition
 from datetime import timedelta
 from threading import Condition
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING
 
 from ttlru_map import TTLMap
 from typing_extensions import override
@@ -16,6 +16,7 @@ from cachium.logger import logger
 from ._abc import BaseAsyncLock, BaseAsyncStorage, BaseLock, BaseStorage, Result, TValue
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from types import TracebackType
 
     from typing_extensions import Self
