@@ -6,8 +6,8 @@ This section contains step-by-step guides for common workflows.
 
 ```python
 from datetime import timedelta
-from py_cashier import cache
-from py_cashier.storages.ttl_map import TTLMapStorage
+from cachium import cache
+from cachium.storages.ttl_map import TTLMapStorage
 
 @cache(storage=TTLMapStorage.create_with(max_size=1000, ttl=timedelta(minutes=10)))
 def get_item(key: str) -> str:
@@ -18,8 +18,8 @@ def get_item(key: str) -> str:
 
 ```python
 from typing import Annotated
-from py_cashier import cache, CacheWith
-from py_cashier.storages.ttl_map import TTLMapStorage
+from cachium import cache, CacheWith
+from cachium.storages.ttl_map import TTLMapStorage
 
 # Cache only by `x`, ignore `y` in the cache key
 @cache(storage=TTLMapStorage.create_with())

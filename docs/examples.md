@@ -10,7 +10,7 @@ This page provides examples of how to use cachium in various scenarios.
 from cachium import cache
 from cachium.storages.ttl_map import TTLMapStorage
 
-@cache()
+@cache(storage=TTLMapStorage.create_with())
 def fibonacci(n: int) -> int:
     """Calculate the nth Fibonacci number."""
     if n <= 1:
@@ -33,12 +33,12 @@ import asyncio
 from cachium import cache
 from cachium.storages.ttl_map import TTLMapAsyncStorage
 
-@cache()
+@cache(storage=TTLMapAsyncStorage.create_with())
 async def fetch_data(user_id: int) -> dict:
     """Simulate fetching user data from a database."""
     print(f"Fetching data for user {user_id}...")
     # Simulate network delay
-    await asyncio.sleep(1)
+    await asyncio.sleep(0.01)
     return {"id": user_id, "name": f"User {user_id}"}
 
 async def main():
@@ -63,7 +63,7 @@ from cachium import cache
 from cachium.storages.ttl_map import TTLMapStorage
 import time
 
-@cache(storage=TTLMapStorage.create_with(ttl=timedelta(seconds=5)))
+@cache(storage=TTLMapStorage.create_with(ttl=timedelta(milliseconds=10)))
 def get_timestamp() -> float:
     """Return the current timestamp."""
     return time.time()
@@ -78,7 +78,7 @@ print(f"Timestamp 2: {ts2}")
 print(f"Same timestamp: {ts1 == ts2}")  # Output: True
 
 # Wait for TTL to expire
-time.sleep(6)
+time.sleep(0.02)
 
 # Third call (after TTL expired) - returns new value
 ts3 = get_timestamp()
@@ -118,15 +118,19 @@ process_data(2)  # No output (cached)
 
 ```python
 from cachium import cache
-from cachium.key_builders import DefaultKeyBuilder
+from cachium.key_builders import KeyBuilder
+from cachium.storages.ttl_map import TTLMapStorage
 
-# Only consider the first argument for caching
-key_builder = DefaultKeyBuilder(
-    func=lambda x, *args, **kwargs: x,
-    prefix="first_arg_only"
+class FirstArgumentKeyBuilder(KeyBuilder):
+    """Build keys from only the first positional argument."""
+
+    def build_key(self, *args, **kwargs) -> str:
+        return f"first_arg_only:{args[0]}"
+
+@cache(
+    storage=TTLMapStorage.create_with(),
+    key_builder=FirstArgumentKeyBuilder,
 )
-
-@cache(key_builder=key_builder)
 def add_numbers(a: int, b: int) -> int:
     print(f"Adding {a} + {b}")
     return a + b
@@ -149,17 +153,21 @@ print(result3)  # Output: 17
 
 ```python
 from cachium import cache
-from cachium.key_builders import DefaultKeyBuilder
+from cachium.key_builders import KeyBuilder
 from cachium.serializers import Md5Serializer
+from cachium.storages.ttl_map import TTLMapStorage
 
-# Use MD5 serializer for consistent hashing across processes
-key_builder = DefaultKeyBuilder(
-    func=lambda x, y: x + y,
-    key_serializer=Md5Serializer
+class HashedArgsKeyBuilder(KeyBuilder):
+    """Build compact keys from args and kwargs."""
+
+    def build_key(self, *args, **kwargs) -> str:
+        return Md5Serializer.serialize((args, sorted(kwargs.items())))
+
+
+@cache(
+    storage=TTLMapStorage.create_with(),
+    key_builder=HashedArgsKeyBuilder,
 )
-
-
-@cache(key_builder=key_builder)
 def compute_value(x: int, y: int) -> int:
     print(f"Computing {x} * {y}")
     return x * y
@@ -179,8 +187,8 @@ print(result_again)  # Output: 50
 ### Caching Database Queries
 
 ```python
-from py_cashier import cache
-from py_cashier._storages import TTLMapStorage
+from cachium import cache
+from cachium.storages.ttl_map import TTLMapStorage
 from datetime import timedelta
 import sqlite3
 
@@ -224,14 +232,14 @@ import asyncio
 import random
 from datetime import timedelta
 from cachium import cache
-from cachium.storages.ttl_map import TTLMapStorage
+from cachium.storages.ttl_map import TTLMapAsyncStorage
 
-@cache(storage=TTLMapStorage.create_with(ttl=timedelta(minutes=5)))
+@cache(storage=TTLMapAsyncStorage.create_with(ttl=timedelta(minutes=5)))
 async def fetch_weather(city: str) -> dict:
     """Simulate fetching weather data from an API."""
     print(f"Fetching weather data for {city}...")
     # Simulate API request delay
-    await asyncio.sleep(1)
+    await asyncio.sleep(0.01)
     # Return simulated weather data
     return {
         "city": city,

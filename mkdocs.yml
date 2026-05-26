@@ -24,13 +24,21 @@ theme:
 
 nav:
   - Home: index.md
+  - Installation: installation.md
+  - Guides:
+    - Quickstart: guides/quickstart.md
+    - Concepts: guides/concepts.md
+    - Tutorials: guides/tutorials.md
   - API Reference:
     - Overview: api/index.md
     - Cache: api/cache.md
     - Builders: api/builders.md
     - Serializers: api/serializers.md
+    - Storages: api/storages.md
     - Utilities: api/utilities.md
   - Examples: examples.md
+  - Changelog: changelog.md
+  - Contributing: contributing.md
 
 markdown_extensions:
   - pymdownx.highlight:

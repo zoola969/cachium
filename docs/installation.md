@@ -5,17 +5,17 @@ Supported Python versions: 3.10 – 3.14
 Install from PyPI:
 
 ```bash
-pip install py-cashier
+pip install cachium
 ```
 
 Upgrade to latest:
 
 ```bash
-pip install -U py-cashier
+pip install -U cachium
 ```
 
 Verify installation:
 
 ```bash
-python -c "import py_cashier; print(py_cashier.__version__)"
+python -c "import cachium; print(cachium.__version__)"
 ```

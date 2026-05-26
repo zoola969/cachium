@@ -8,8 +8,10 @@ When to use:
 - You want to avoid thundering herds via per-key locks.
 
 Common parameters:
-- storage: callable returning the storage instance (TTLMapStorage for sync, TTLMapAsyncStorage for async).
-- key_builder: optional callable returning a KeyBuilder to customize how keys are built (which args participate, serialization, prefixes, etc.).
+- storage: required callable returning the storage instance (`TTLMapStorage` for sync, `TTLMapAsyncStorage` for async).
+- key_builder: optional callable returning a `KeyBuilder` to customize how keys are built (which args participate, serialization, prefixes, etc.).
+
+The storage factory is called once at decoration time, so each decorated function gets its own storage instance. Passing a sync storage to an async function, or an async storage to a sync function, raises `TypeError`.
 
 See also: Quickstart, Concepts, and Examples pages. Full reference below.
 

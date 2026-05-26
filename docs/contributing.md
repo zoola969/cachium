@@ -12,13 +12,13 @@ This page combines our previous Development Guide and contribution guidelines.
 Install the docs toolchain:
 
 ```bash
-pip install mkdocs mkdocs-material "mkdocstrings[python]"
+uv sync --group docs
 ```
 
 Preview documentation locally:
 
 ```bash
-mkdocs serve
+uv run mkdocs serve
 ```
 
 This will start a local server (usually http://127.0.0.1:8000/).
@@ -26,7 +26,7 @@ This will start a local server (usually http://127.0.0.1:8000/).
 ## Running tests
 
 ```bash
-pytest -q
+uv run pytest
 ```
 
 ## Linting and typing
@@ -36,4 +36,4 @@ pytest -q
 
 ## Opening issues and PRs
 
-Open issues and PRs on GitHub: https://github.com/zoola969/py-cashier
+Open issues and PRs on GitHub: https://github.com/zoola969/cachium
