@@ -9,7 +9,7 @@ on:
       - 'mkdocs.yml'
       - '.github/workflows/docs-check.yml'
   push:
-    branches: [ main ]
+    branches: [ master ]
     paths:
       - 'docs/**'
       - 'mkdocs.yml'
@@ -31,7 +31,7 @@ jobs:
         run: uv run --no-project mkdocs build --strict
 
       - name: Link check (external and internal)
-        uses: lycheeverse/lychee-action@v1
+        uses: lycheeverse/lychee-action@8646ba30535128ac92d33dfc9133794bfdd9b411  # v2
         with:
           args: --no-progress --verbose --accept 200,429 --base . "site/**/*.html"
         env:
