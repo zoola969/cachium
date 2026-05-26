@@ -232,7 +232,7 @@ def _f() -> None:
 )
 def test__decorator__invalid_storage(func: Callable[..., Any], storage: PStorage | PAsyncStorage) -> None:
     """Test that the decorator raises TypeError for invalid storage."""
-    with pytest.raises(TypeError, match="(Async|Regular) function requires a(n async| sync) storage"):
+    with pytest.raises(TypeError, match=r"(Async|Regular) function requires a(n async| sync) storage"):
         cache(storage=storage)(func)
 
 
