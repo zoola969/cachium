@@ -29,7 +29,7 @@ def expensive_calculation(x: int, y: int) -> int:
     return x + y
 
 # First call performs the calculation
-result1 = expensive_calculation(1, 2)  # Output: Calculating 1 + 2
+result1 = expensive_calculation(1, 2)
 print(result1)  # Output: 3
 
 # Second call uses cached result
@@ -39,7 +39,7 @@ print(result2)  # Output: 3
 # Async function caching works too
 @cache(storage=TTLMapAsyncStorage.create_with(max_size=100, ttl=None))
 async def async_io_operation(x: int, y: int) -> int:
-    await asyncio.sleep(1)  # Simulate an I/O-bound operation
+    await asyncio.sleep(0.01)  # Simulate an I/O-bound operation
     return x + y
 
 

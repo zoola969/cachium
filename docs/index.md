@@ -32,22 +32,43 @@ from cachium.storages.ttl_map import TTLMapStorage
 def add(a: int, b: int) -> int:
     return a + b
 
-# Simple function caching
-@cache()
-def expensive_calculation(x: int, y: int) -> int:
-    print(f"Calculating {x} + {y}")
-    return x + y
+print(add(1, 2))
+print(add(1, 2))  # cached
+```
 
 Async:
+
 ```python
 import asyncio
 from datetime import timedelta
 from cachium import cache
 from cachium.storages.ttl_map import TTLMapAsyncStorage
 
-# Second call uses cached result
-result2 = expensive_calculation(1, 2)  # No calculation performed
-print(result2)  # Output: 3
+@cache(storage=TTLMapAsyncStorage.create_with(max_size=1024, ttl=timedelta(minutes=1)))
+async def expensive_calculation(x: int, y: int) -> int:
+    await asyncio.sleep(0.01)
+    return x + y
+
+async def main():
+    print(await expensive_calculation(1, 2))
+    print(await expensive_calculation(1, 2))  # cached
+
+asyncio.run(main())
+```
+
+Selective key arguments:
+
+```python
+from typing import Annotated
+from cachium import CacheWith, cache
+from cachium.storages.ttl_map import TTLMapStorage
+
+@cache(storage=TTLMapStorage.create_with())
+def compute(x: Annotated[int, CacheWith()], y: int) -> int:
+    return x + y
+
+print(compute(1, 10))
+print(compute(1, 999))  # cached by x only
 ```
 
 ## License

@@ -23,3 +23,7 @@ Related pages: Key Builders and Concepts. Full reference below.
 ---
 
 ::: cachium.serializers._std_hash.StdHashSerializer
+
+---
+
+::: cachium.serializers._md5.Md5Serializer

@@ -11,8 +11,8 @@ Notes:
 
 ```python
 from datetime import timedelta
-from py_cashier import cache
-from py_cashier.storages.ttl_map import TTLMapStorage
+from cachium import cache
+from cachium.storages.ttl_map import TTLMapStorage
 
 # Configure TTL and max size
 @cache(storage=TTLMapStorage.create_with(max_size=512, ttl=timedelta(seconds=30)))
@@ -28,14 +28,14 @@ print(add(1, 2))  # cached
 ```python
 import asyncio
 from datetime import timedelta
-from py_cashier import cache
-from py_cashier.storages.ttl_map import TTLMapAsyncStorage
+from cachium import cache
+from cachium.storages.ttl_map import TTLMapAsyncStorage
 
 # Configure TTL and max size for async storage
 @cache(storage=TTLMapAsyncStorage.create_with(max_size=512, ttl=timedelta(seconds=30)))
 async def add_async(a: int, b: int) -> int:
     # Simulate I/O
-    await asyncio.sleep(0.1)
+    await asyncio.sleep(0.01)
     return a + b
 
 async def main():
@@ -49,8 +49,8 @@ asyncio.run(main())
 
 ```python
 from typing import Annotated
-from py_cashier import cache, CacheWith
-from py_cashier.storages.ttl_map import TTLMapStorage
+from cachium import cache, CacheWith
+from cachium.storages.ttl_map import TTLMapStorage
 
 # Only `x` participates in the cache key; calls differing only by `y` share the cached result
 @cache(storage=TTLMapStorage.create_with())

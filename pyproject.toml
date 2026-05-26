@@ -4,7 +4,7 @@ requires = ["hatchling", "uv-dynamic-versioning"]
 
 [dependency-groups]
 dev = [
-    "black>=25.1,<27.0",
+    "black~=26.0",
     "pre-commit~=4.0",
 ]
 docs = [
@@ -14,9 +14,9 @@ docs = [
 ]
 test = [
     "coverage~=7.3",
-    "mypy>=1.17,<3.0",
-    "pytest-asyncio>=0.24,<2.0",
-    "pytest>=8.1,<10.0",
+    "mypy~=2.0",
+    "pytest-asyncio~=1.0",
+    "pytest~=9.0",
 ]
 
 [project]
@@ -51,8 +51,8 @@ readme = "README.md"
 requires-python = ">=3.10"
 
 [project.urls]
-Changelog = "https://github.com/zoola969/cachium/CHANGELOG.md"
-Documentation = "https://cachium.readthedocs.io/en/latest/"
+Changelog = "https://github.com/zoola969/cachium/blob/main/CHANGELOG.md"
+Documentation = "https://zoola969.github.io/cachium/"
 Homepage = "https://github.com/zoola969/cachium"
 Issues = "https://github.com/zoola969/cachium/issues"
 Repository = "https://github.com/zoola969/cachium.git"
