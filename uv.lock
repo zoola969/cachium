@@ -155,7 +155,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "black", specifier = ">=25.1,<27.0" },
+    { name = "black", specifier = "~=26.0" },
     { name = "pre-commit", specifier = "~=4.0" },
 ]
 docs = [
@@ -165,9 +165,9 @@ docs = [
 ]
 test = [
     { name = "coverage", specifier = "~=7.3" },
-    { name = "mypy", specifier = ">=1.17,<3.0" },
-    { name = "pytest", specifier = ">=8.1,<10.0" },
-    { name = "pytest-asyncio", specifier = ">=0.24,<2.0" },
+    { name = "mypy", specifier = "~=2.0" },
+    { name = "pytest", specifier = "~=9.0" },
+    { name = "pytest-asyncio", specifier = "~=1.0" },
 ]
 
 [[package]]
