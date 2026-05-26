@@ -9,7 +9,7 @@ on:
       - 'mkdocs.yml'
       - '.github/workflows/docs-check.yml'
   push:
-    branches: [ main ]
+    branches: [ master ]
     paths:
       - 'docs/**'
       - 'mkdocs.yml'
