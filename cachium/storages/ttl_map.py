@@ -43,7 +43,6 @@ class LockStorage:
     def register_lock(self, key: TCacheKey, id_: int, timeout: float | None) -> None:
         deadline = time.monotonic() + timeout if timeout is not None else None
         with self._condition:
-
             while key in self._locks:
                 logger.debug("Key '%s' is in use, waiting for release.", key)
                 wait_time = deadline - time.monotonic() if deadline is not None else None
@@ -71,7 +70,6 @@ class AsyncLockStorage:
 
     async def register_lock(self, key: TCacheKey, id_: int, timeout: float | None) -> None:
         async with self._condition:
-
             while key in self._locks:
                 logger.debug("Key '%s' is in use, waiting for release.", key)
                 try:

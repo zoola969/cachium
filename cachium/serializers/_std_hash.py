@@ -1,5 +1,7 @@
 from collections.abc import Hashable
 
+from typing_extensions import override
+
 from ._abc import Serializer
 
 
@@ -34,6 +36,7 @@ class StdHashSerializer(Serializer):
 
     """
 
+    @override
     @classmethod
     def serialize(cls, value: Hashable) -> str:
         """Convert value to string."""

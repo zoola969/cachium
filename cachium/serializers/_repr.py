@@ -1,5 +1,7 @@
 from typing import Any
 
+from typing_extensions import override
+
 from ._abc import Serializer
 
 
@@ -23,7 +25,8 @@ class ReprSerializer(Serializer):
     ```
     """
 
+    @override
     @classmethod
-    def serialize(cls, value: Any) -> str:  # noqa: ANN401
+    def serialize(cls, value: Any) -> str:
         """Convert value to string."""
         return repr(value)
