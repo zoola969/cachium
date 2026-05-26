@@ -3,6 +3,8 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Generic, TypeVar
 
+from typing_extensions import override
+
 if TYPE_CHECKING:
     from datetime import timedelta
     from types import TracebackType
@@ -20,6 +22,7 @@ class Result(Generic[TValue]):
     def __init__(self, value: TValue) -> None:
         self._value = value
 
+    @override
     def __repr__(self) -> str:
         return f"Result({self._value!r})"
 
