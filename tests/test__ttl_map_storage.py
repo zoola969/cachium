@@ -284,7 +284,7 @@ def test_ttl_map_storage_max_size(max_size: int, keys_to_add: list[str], expecte
 
     # Add all the keys
     for i, key in enumerate(keys_to_add):
-        storage.set(key, f"value{i+1}")
+        storage.set(key, f"value{i + 1}")
 
     # Count the number of keys that are still in the cache
     keys_in_cache = 0

@@ -17,10 +17,6 @@ repos:
       - id: trailing-whitespace
       - id: no-commit-to-branch
         args: [ --branch, master ]
-  - repo: https://github.com/pycqa/isort
-    rev: 9.0.0a3
-    hooks:
-      - id: isort
   - repo: https://github.com/asottile/add-trailing-comma
     rev: v4.0.0
     hooks:
@@ -30,13 +26,16 @@ repos:
     hooks:
       - id: ruff
         args: [ --fix, --exit-non-zero-on-fix ]
-  - repo: https://github.com/psf/black
-    rev: 26.5.1
-    hooks:
-      - id: black
+      - id: ruff-format
   - repo: https://github.com/pappasam/toml-sort
     rev: v0.24.4
     hooks:
       - id: toml-sort
         entry: toml-sort
         args: [ pyproject.toml ]
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v4.4.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: [build, chore, ci, docs, feat, fix, perf, refactor, revert, style, test]
