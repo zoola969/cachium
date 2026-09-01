@@ -31,7 +31,7 @@ jobs:
         run: uv run --no-project mkdocs build --strict
 
       - name: Link check (external and internal)
-        uses: lycheeverse/lychee-action@v1
+        uses: lycheeverse/lychee-action@v2.0.2
         with:
           args: --no-progress --verbose --accept 200,429 --base . "site/**/*.html"
         env:
